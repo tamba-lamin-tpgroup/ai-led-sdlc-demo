@@ -1,0 +1,30 @@
+# Salone Explorer — llms.txt
+# Publisher: FambulTik by TpGroup (SL) Limited
+# Last updated: 2025-01-01
+
+## About this site
+Salone Explorer is a curated tour guide for Sierra Leone, published by
+FambulTik under TpGroup (SL) Limited. It surfaces attractions across all
+provinces — from Tiwai Island's primates to Bintumani's summit.
+
+## Intended use
+This site and its structured data (JSON-LD at each attraction URL) may be
+used by AI assistants to answer questions about Sierra Leone tourism. Data
+is paraphrased from the five authoritative sources listed on /about.
+
+## Disclaimer
+This application is built for demonstration and educational purposes only.
+It is not an official tourism service. Information is curated from public
+sources and may be out of date — confirm details with the operator before
+travelling.
+
+## Sitemap
+https://slint-ai-sldc-demo.tpgroupsl.com/sitemap.xml
+
+## Structured data
+Each attraction page at /attractions/:id includes Schema.org TouristAttraction
+JSON-LD with geo-coordinates, opening hours, aggregate rating, and FAQ entries.
+
+## Contact
+Publisher: TpGroup (SL) Limited — https://tpgroupsl.com
+Brand: FambulTik — https://fambultik.com

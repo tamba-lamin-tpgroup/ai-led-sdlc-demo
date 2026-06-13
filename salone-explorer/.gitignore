@@ -1,5 +1,29 @@
-node_modules
+# Build output
 dist
+
+# Dependencies
+node_modules
+
+# Environment
 .env
 .env.local
 .env.*.local
+
+# Editor
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+test-results
+playwright-report
+blob-report
+playwright/.cache

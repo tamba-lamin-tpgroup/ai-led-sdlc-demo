@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://slint-ai-sldc-demo.tpgroupsl.com/sitemap.xml

@@ -1,0 +1,44 @@
+/* FambulTik design tokens — sourced from TpGroup Design System (design.tpgroupsl.com). */
+/* Consumed by Tailwind via CSS variables. See SPEC §8.4. */
+:root {
+  /* Brand — FambulTik */
+  --color-brand-primary:    #C2410C;
+  --color-brand-secondary:  #15803D;
+  --color-brand-accent:     #0369A1;
+  --color-brand-sand:       #FEF3C7;
+
+  /* TpGroup parent endorsement */
+  --color-tpgroup-primary:  #011B54;
+
+  /* Semantic */
+  --color-bg:               #FFFFFF;
+  --color-surface:          #FAFAF9;
+  --color-text:             #1C1917;
+  --color-text-muted:       #57534E;
+  --color-border:           #E7E5E4;
+  --color-focus-ring:       #0369A1;
+  --color-success:          #15803D;
+  --color-warning:          #B45309;
+  --color-danger:           #B91C1C;
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Lora", Georgia, serif;
+  --fs-12: 0.75rem;  --fs-14: 0.875rem;  --fs-16: 1rem;
+  --fs-18: 1.125rem; --fs-20: 1.25rem;   --fs-24: 1.5rem;
+  --fs-30: 1.875rem; --fs-36: 2.25rem;   --fs-48: 3rem;
+  --lh-tight: 1.2;   --lh-snug: 1.35;    --lh-normal: 1.5;
+
+  /* Spacing (4-px scale) */
+  --sp-1: 0.25rem;  --sp-2: 0.5rem;  --sp-3: 0.75rem;  --sp-4: 1rem;
+  --sp-6: 1.5rem;   --sp-8: 2rem;    --sp-12: 3rem;    --sp-16: 4rem;
+
+  /* Radius */
+  --r-sm: 0.25rem; --r-md: 0.5rem; --r-lg: 0.75rem; --r-xl: 1rem; --r-full: 9999px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 8px rgba(0,0,0,.08);
+  --shadow-lg: 0 12px 24px rgba(0,0,0,.10);
+  --shadow-xl: 0 24px 48px rgba(0,0,0,.12);
+}
