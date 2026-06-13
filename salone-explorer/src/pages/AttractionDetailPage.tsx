@@ -1,5 +1,5 @@
 // Attraction detail page — /attractions/:id. Public route.
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   MapPin, Clock, Star, ExternalLink, ChevronRight,
@@ -11,7 +11,7 @@ import SeoHead from "@/components/SeoHead";
 import JsonLd from "@/components/JsonLd";
 import { attractions, t } from "@/lib/content";
 import { buildAttractionSchema, buildGraph, buildWebSiteSchema } from "@/seo/graph";
-import { buildMapsUrl, cn, formatRating } from "@/lib/utils";
+import { buildMapsUrl, cn, formatRating, isSafeExternalUrl, safeYouTubeEmbedUrl } from "@/lib/utils";
 import type { Attraction } from "@/data/types";
 
 const SITE_URL = import.meta.env.VITE_SITE_URL ?? "https://slint-ai-sldc-demo.tpgroupsl.com";
@@ -34,6 +34,18 @@ export default function AttractionDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const pageUrl = `${SITE_URL}/attractions/${id ?? ""}`;
+  const graph = useMemo(
+    () =>
+      attraction
+        ? buildGraph([buildWebSiteSchema(), buildAttractionSchema(attraction, pageUrl)])
+        : null,
+    [attraction, pageUrl],
+  );
+  const mapsUrl = attraction
+    ? buildMapsUrl(attraction.location.latitude, attraction.location.longitude, attraction.name)
+    : "";
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -50,7 +62,6 @@ export default function AttractionDetailPage() {
   }
 
   if (notFound || !attraction) {
-    const pageUrl = `${SITE_URL}/attractions/${id ?? ""}`;
     return (
       <>
         <SeoHead
@@ -76,14 +87,6 @@ export default function AttractionDetailPage() {
     );
   }
 
-  const pageUrl = `${SITE_URL}/attractions/${attraction.id}`;
-  const graph = buildGraph([buildWebSiteSchema(), buildAttractionSchema(attraction, pageUrl)]);
-  const mapsUrl = buildMapsUrl(
-    attraction.location.latitude,
-    attraction.location.longitude,
-    attraction.name
-  );
-
   return (
     <>
       <SeoHead
@@ -93,7 +96,7 @@ export default function AttractionDetailPage() {
         image={attraction.images[0]}
         type="article"
       />
-      <JsonLd graph={graph} />
+      {graph && <JsonLd graph={graph} />}
 
       <div className="min-h-screen flex flex-col">
         <NavBar />
@@ -160,7 +163,7 @@ export default function AttractionDetailPage() {
               <div className="mt-3 flex items-center gap-2">
                 <div
                   className="flex items-center gap-1"
-                  aria-label={`${t("attraction.rating")}: ${formatRating(attraction.rating)} out of 5 from ${attraction.reviewCount} ${t("attraction.reviews")}`}
+                  aria-label={`${t("attraction.rating")}: ${formatRating(attraction.rating)} ${t("attraction.card.ratingAria")} — ${attraction.reviewCount} ${t("attraction.reviews")}`}
                 >
                   <Star size={16} className="fill-brand-primary text-brand-primary" aria-hidden="true" />
                   <span className="font-semibold text-text">{formatRating(attraction.rating)}</span>
@@ -173,7 +176,7 @@ export default function AttractionDetailPage() {
 
             {/* Description */}
             <section aria-labelledby="description-heading" className="mb-10">
-              <h2 id="description-heading" className="sr-only">About this attraction</h2>
+              <h2 id="description-heading" className="sr-only">{t("attraction.description.heading")}</h2>
               <div className="prose max-w-none">
                 {attraction.longDescription.split("\n\n").map((para, i) => (
                   <p key={i} className="text-text leading-relaxed mb-4">
@@ -198,7 +201,7 @@ export default function AttractionDetailPage() {
                   <dd className="text-text mt-0.5">{attraction.hours.daysOpen}</dd>
                 </div>
                 <div>
-                  <dt className="font-medium text-text-muted">Hours</dt>
+                  <dt className="font-medium text-text-muted">{t("attraction.hours.label")}</dt>
                   <dd className="text-text mt-0.5">{attraction.hours.open} – {attraction.hours.close}</dd>
                 </div>
                 {attraction.hours.notes && (
@@ -224,18 +227,19 @@ export default function AttractionDetailPage() {
               </div>
             </section>
 
-            {/* Video embed */}
-            {attraction.videoUrl && (
+            {/* Video embed — URL validated to youtube.com/youtube-nocookie.com before render */}
+            {attraction.videoUrl && safeYouTubeEmbedUrl(attraction.videoUrl) && (
               <section aria-labelledby="video-heading" className="mb-10">
                 <h2 id="video-heading" className="font-display font-semibold text-lg text-text mb-4">
                   {t("attraction.videoLabel")}
                 </h2>
                 <div className="relative aspect-video rounded-xl overflow-hidden">
                   <iframe
-                    src={attraction.videoUrl.replace("watch?v=", "embed/") + "?cc_load_policy=1"}
+                    src={safeYouTubeEmbedUrl(attraction.videoUrl)!}
                     title={`${attraction.name} video tour`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; encrypted-media; picture-in-picture"
                     allowFullScreen
+                    sandbox="allow-scripts allow-same-origin allow-presentation allow-fullscreen"
                     className="absolute inset-0 h-full w-full"
                     loading="lazy"
                   />
@@ -289,7 +293,7 @@ export default function AttractionDetailPage() {
                   {t("attraction.sources.heading")}
                 </h2>
                 <ul className="space-y-1 text-sm list-none m-0 p-0">
-                  {attraction.sources.map((src) => (
+                  {attraction.sources.filter(isSafeExternalUrl).map((src) => (
                     <li key={src}>
                       <a
                         href={src}

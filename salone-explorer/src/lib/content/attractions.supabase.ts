@@ -2,6 +2,7 @@
 // Implements Phase 2.5 optional migration. Per SPEC §5.3.
 import type { Attraction } from "@/data/types";
 import type { AttractionRepository } from "./attractions";
+import { cachedFetch } from "./cache";
 
 function toAttraction(row: Record<string, unknown>): Attraction {
   return {
@@ -31,32 +32,30 @@ function toAttraction(row: Record<string, unknown>): Attraction {
   };
 }
 
+async function makeClient() {
+  const { createClient } = await import("@supabase/supabase-js");
+  return createClient(
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY,
+  );
+}
+
 export const supabaseAttractionRepository: AttractionRepository = {
-  async getAll() {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
-    const { data, error } = await supabase
-      .from("attractions")
-      .select("*")
-      .order("name");
-    if (error) throw new Error(`attractions.getAll: ${error.message}`);
-    return (data as Record<string, unknown>[]).map(toAttraction);
+  getAll() {
+    return cachedFetch("attractions:all", async () => {
+      const supabase = await makeClient();
+      const { data, error } = await supabase.from("attractions").select("*").order("name");
+      if (error) throw new Error(`attractions.getAll: ${error.message}`);
+      if (!data) throw new Error("attractions.getAll: no data returned — check RLS policy for anon read");
+      return (data as Record<string, unknown>[]).map(toAttraction);
+    });
   },
-  async getById(id: string) {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      import.meta.env.VITE_SUPABASE_URL,
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
-    const { data, error } = await supabase
-      .from("attractions")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-    if (error) throw new Error(`attractions.getById: ${error.message}`);
-    return data ? toAttraction(data as Record<string, unknown>) : null;
+  getById(id: string) {
+    return cachedFetch(`attractions:${id}`, async () => {
+      const supabase = await makeClient();
+      const { data, error } = await supabase.from("attractions").select("*").eq("id", id).maybeSingle();
+      if (error) throw new Error(`attractions.getById: ${error.message}`);
+      return data ? toAttraction(data as Record<string, unknown>) : null;
+    });
   },
 };

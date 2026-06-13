@@ -13,3 +13,4 @@ export { t } from "./strings";
 export { getSources } from "./sources";
 export type { AttractionRepository } from "./attractions";
 export type { DataSource } from "./sources";
+export { invalidateCache } from "./cache";

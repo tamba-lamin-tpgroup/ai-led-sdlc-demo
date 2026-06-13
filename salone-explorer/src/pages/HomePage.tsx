@@ -1,5 +1,5 @@
 // Home page — hero + attraction grid. Public route at /.
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import DisclaimerBanner from "@/components/DisclaimerBanner";
@@ -25,7 +25,7 @@ export default function HomePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const graph = buildGraph([buildWebSiteSchema()]);
+  const graph = useMemo(() => buildGraph([buildWebSiteSchema()]), []);
 
   return (
     <>

@@ -21,6 +21,11 @@
   "home.attractions.empty": "No attractions found. Check back soon.",
   "home.search.placeholder": "Search attractions...",
 
+  "attraction.card.learnMore": "Learn more",
+  "attraction.card.learnMoreAria": "Learn more about this attraction",
+  "attraction.card.ratingAria": "out of 5",
+  "attraction.description.heading": "About this attraction",
+  "attraction.hours.label": "Hours",
   "attraction.openingHours": "Opening Hours",
   "attraction.closingTime": "Closes",
   "attraction.daysOpen": "Open",
