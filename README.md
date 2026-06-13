@@ -11,7 +11,7 @@ A mobile-first, **WCAG 2.2 Level AA**, SEO-, AEO-, and GEO-optimised tour-guide 
 [![WCAG 2.2 AA](https://img.shields.io/badge/WCAG-2.2%20AA-15803D)](https://www.w3.org/TR/WCAG22/)
 [![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-7C3AED)](https://docs.claude.com/claude-code)
 
-**Live demo:** [slint-ai-led-sdlc.tpgroupsl.com](https://slint-ai-led-sdlc.tpgroupsl.com) _(production domain; live after first deploy)_
+**Live demo:** [slint-ai-sldc-demo.tpgroupsl.com](https://slint-ai-sldc-demo.tpgroupsl.com) _(production domain; live after first deploy)_
 **Vercel project:** [`slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo) &middot; **Supabase project:** `slint-ai-led-sdlc-demo`
 
 > **⚠️ Live-demo scope.** This repository hosts the **live, in-class demonstration**, which delivers **Phase 1 — Static foundation only**. The spec and docs describe the full roadmap (Phases 1–11) for context, but only Phase 1 is built here. The `salone-explorer/` app is scaffolded **live during the demo** and is intentionally absent from this repo at the start — the root holds only the spec, docs, CI config, and the `.claude/` harness.
@@ -243,7 +243,7 @@ Vite only exposes variables prefixed with `VITE_` to client code.
 
 ```env
 # Production custom domain. Vercel preview deploys use their *.vercel.app URL.
-VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com
+VITE_SITE_URL=https://slint-ai-sldc-demo.tpgroupsl.com
 VITE_ATTRACTIONS_SOURCE=file
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
@@ -453,8 +453,8 @@ See `SPEC.md` §5.4 for the architectural sketch.
 ### Vercel
 Project: [`slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo). Use the existing project — do not create a new one.
 1. Connect the repo to the existing project. **Root Directory: `salone-explorer`** (excludes `.claude/` and `docs/` from the build). Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
-2. Set env vars: `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
-3. Map the `slint-ai-led-sdlc.tpgroupsl.com` domain. Deploy. Auto-deploys on every push to `main`.
+2. Set env vars: `VITE_SITE_URL=https://slint-ai-sldc-demo.tpgroupsl.com`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
+3. Map the `slint-ai-sldc-demo.tpgroupsl.com` domain. Deploy. Auto-deploys on every push to `main`.
 
 ### Post-deploy verification
 - `/robots.txt`, `/sitemap.xml`, `/llms.txt` resolve.
