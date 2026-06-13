@@ -758,7 +758,7 @@ ai-led-sdlc-demo/                  # repository root (NOT deployed)
 │   │   └── a11y.yml
 │   └── dependabot.yml
 ├── .claude/                       # AI-led SDLC harness (rules, agents, skills, hooks)
-├── docs/                          # documentation (architecture.html, onboarding.html, adr/)
+├── docs/                          # documentation (architecture.html, onboarding.html, agentic-sdlc-kickstarter.html, adr/)
 ├── SPEC.md
 ├── README.md
 ├── STUDENT_GUIDE.md
