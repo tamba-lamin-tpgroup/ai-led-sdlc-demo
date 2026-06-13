@@ -11,7 +11,7 @@ SPEC §12 deploys by setting the Vercel project's **Root Directory** to
 the app-level `salone-explorer/vercel.json` supplies headers and SPA
 rewrites.
 
-In the live project (`slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo`) the Root Directory was
+In the live project (`slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo`) the Root Directory was
 unset (`framework: null`, `rootDirectory: null`). Vercel therefore built
 from the repo root — which has no app — and every route returned
 `404 NOT_FOUND`. The Root Directory is dashboard-only; it cannot be set via

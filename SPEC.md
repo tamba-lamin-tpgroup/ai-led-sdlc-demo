@@ -4,7 +4,7 @@
 > **Brand:** **FambulTik** — TpGroup's heritage-and-diaspora subsidiary
 > **Repository:** `git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git`
 > **Production domain:** `slint-ai-led-sdlc.tpgroupsl.com`
-> **Vercel project:** `slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo` ([dashboard](https://vercel.com/slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo))
+> **Vercel project:** `slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo` ([dashboard](https://vercel.com/slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo))
 > **Supabase project:** `slint-ai-led-sdlc-demo`
 > **Design system:** [TpGroup Design System](https://design.tpgroupsl.com/) (multi-brand, WCAG 2.2 AA)
 > **Disclaimer:** *This application is built for demonstration and educational purposes only. It is not an official tourism service. Information is curated from public sources and may be out of date — confirm details with the operator before travelling.*
@@ -1027,7 +1027,7 @@ Node 20+ required.
 18. Add `.github/workflows/*` and `dependabot.yml` **at the repository root** (`.github/` cannot live in a subfolder). Each job sets `defaults.run.working-directory: salone-explorer` so lint/typecheck/build/test run in the app dir; Dependabot points at `salone-explorer/package.json`.
 19. Add `salone-explorer/tests/a11y/smoke.spec.ts`.
 20. Update README; commit; push.
-21. In the **existing** Vercel project `slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo` (do not create a new one), set **Root Directory = `salone-explorer`** (this is what excludes `.claude/` and `docs/` from the build), Framework Preset = Vite, Output = `dist`; set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
+21. In the **existing** Vercel project `slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo` (do not create a new one), set **Root Directory = `salone-explorer`** (this is what excludes `.claude/` and `docs/` from the build), Framework Preset = Vite, Output = `dist`; set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
 22. Validate live URL with Schema.org Validator + Lighthouse.
 
 ### Phase 5 — Supabase provisioning (≈ 10 min)

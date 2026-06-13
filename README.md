@@ -12,7 +12,7 @@ A mobile-first, **WCAG 2.2 Level AA**, SEO-, AEO-, and GEO-optimised tour-guide 
 [![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-7C3AED)](https://docs.claude.com/claude-code)
 
 **Live demo:** [slint-ai-led-sdlc.tpgroupsl.com](https://slint-ai-led-sdlc.tpgroupsl.com) _(production domain; live after first deploy)_
-**Vercel project:** [`slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo) &middot; **Supabase project:** `slint-ai-led-sdlc-demo`
+**Vercel project:** [`slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo) &middot; **Supabase project:** `slint-ai-led-sdlc-demo`
 
 > **⚠️ Live-demo scope.** This repository hosts the **live, in-class demonstration**, which delivers **Phase 1 — Static foundation only**. The spec and docs describe the full roadmap (Phases 1–11) for context, but only Phase 1 is built here. The `salone-explorer/` app is scaffolded **live during the demo** and is intentionally absent from this repo at the start — the root holds only the spec, docs, CI config, and the `.claude/` harness.
 
@@ -451,7 +451,7 @@ See `SPEC.md` §5.4 for the architectural sketch.
 ## Deployment
 
 ### Vercel
-Project: [`slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo). Use the existing project — do not create a new one.
+Project: [`slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo`](https://vercel.com/slint-ai-led-sdlc-s-projects/slint-ai-led-sdlc-demo). Use the existing project — do not create a new one.
 1. Connect the repo to the existing project. **Root Directory: `salone-explorer`** (excludes `.claude/` and `docs/` from the build). Framework Preset: **Vite**. Build Command: `npm run build`. Output Directory: `dist`.
 2. Set env vars: `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com`, `VITE_ATTRACTIONS_SOURCE=file`, and (Phase 2) `VITE_SUPABASE_*`.
 3. Map the `slint-ai-led-sdlc.tpgroupsl.com` domain. Deploy. Auto-deploys on every push to `main`.
