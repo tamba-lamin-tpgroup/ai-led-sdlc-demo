@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# commit-msg - tool-agnostic traceability-trailer gate.
+# Runs for every commit regardless of the authoring tool (Claude Code,
+# Codex, Gemini, or a bare terminal), so the spec-first policy holds even
+# where Claude Code's settings.json hooks are absent. Mirrors the trailer
+# check in .claude/hooks/pre-tool-bash.sh; see .claude/rules/spec-first.md
+# and .claude/rules/commit-conventions.md.
+#
+# Exit 0 = allow. Exit 1 = block.
+#
+# Known gap: a commit made with `git commit --no-verify` skips this hook
+# by definition. CI is the only backstop for that; do not rely on this
+# hook alone. See docs/dev-guide/multi-tool-enforcement.md.
+set -euo pipefail
+
+msg_file="$1"
+msg="$(cat "$msg_file")"
+
+# Merge and fixup/squash commits carry no original intent of their own and
+# are exempt, matching the amend/-C exemption in the Claude Code hook.
+first_line="$(printf '%s\n' "$msg" | awk 'NF{print; exit}')"
+case "$first_line" in
+  "Merge "*|"fixup! "*|"squash! "*|"Revert "*) exit 0 ;;
+esac
+
+if printf '%s\n' "$msg" | grep -qiE '(Requirement|Phase|Incident):[[:space:]]+\S'; then
+  exit 0
+fi
+
+>&2 echo "[blocked] commit message is missing a traceability trailer"
+>&2 echo "          every commit must trace to SPEC.md, a requirement, or an incident."
+>&2 echo "          spec work:   Requirement: SPEC Phase 3 - accessibility  (or:  Phase: 3)"
+>&2 echo "          requirement: Requirement: STORY-0042-<slug>"
+>&2 echo "          hotfix:      Incident: <incident-id>"
+>&2 echo "          see: .claude/rules/spec-first.md and commit-conventions.md"
+exit 1

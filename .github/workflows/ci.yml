@@ -1,0 +1,32 @@
+# CI: lint (incl. jsx-a11y), typecheck, build (SPEC §15 ci.yml). All steps run
+# in the app subdirectory salone-explorer/ (SPEC §12).
+name: ci
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+defaults:
+  run:
+    working-directory: salone-explorer
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: salone-explorer/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build

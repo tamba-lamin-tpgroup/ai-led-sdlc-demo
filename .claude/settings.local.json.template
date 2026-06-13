@@ -1,0 +1,13 @@
+{
+  "_README": "Copy this file to .claude/settings.local.json (gitignored) and override per-developer values. Local settings are merged on top of settings.json.",
+  "permissions": {
+    "allow": [
+      "Bash(open:*)",
+      "Bash(supabase:*)",
+      "Bash(vercel:*)"
+    ]
+  },
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "REPLACE_WITH_YOUR_TOKEN"
+  }
+}

@@ -1,0 +1,787 @@
+<!doctype html>
+<!--
+  onboarding.html - Browser-viewable onboarding for the Salone Explorer
+  repository and its AI-led SDLC harness (.claude/). Self-contained: inline
+  CSS and JS, no external assets, opens via file:// offline.
+
+  Authoritative sources this mirrors (read those when they disagree):
+    - SPEC.md                          single source of truth
+    - CLAUDE.md                        project operating rules
+    - .claude/rules/*.md               binding, loaded every session
+    - docs/dev-guide/claude-harness.md the concise harness reference
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Salone Explorer - AI-Led SDLC Onboarding</title>
+<style>
+  :root {
+    --bg: #0f1417;
+    --panel: #161d22;
+    --panel-2: #1c252b;
+    --ink: #e7edf0;
+    --muted: #9fb0b8;
+    --line: #2a363d;
+    --green: #1f9d57;
+    --green-soft: #163d2a;
+    --amber: #d9a23a;
+    --amber-soft: #3d3216;
+    --red: #d9534f;
+    --red-soft: #3d1c1b;
+    --blue: #4a90d9;
+    --blue-soft: #16293d;
+    --accent: #1f9d57;
+    --radius: 10px;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6; font-size: 16px;
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre, .mono { font-family: var(--mono); }
+  code {
+    background: var(--panel-2); padding: 0.1em 0.4em; border-radius: 5px;
+    font-size: 0.86em; border: 1px solid var(--line); color: #d7e7dd;
+  }
+  pre {
+    background: #0b0f12; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; overflow-x: auto; font-size: 0.85em; line-height: 1.5;
+  }
+  pre code { background: none; border: none; padding: 0; color: #cfe3d7; }
+
+  /* Layout */
+  .wrap { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  nav.side {
+    position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--line); padding: 22px 16px;
+  }
+  nav.side .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.2px; }
+  nav.side .brand small { display: block; color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-top: 3px; }
+  nav.side ol { list-style: none; margin: 18px 0 0; padding: 0; counter-reset: s; }
+  nav.side ol li { margin: 0; }
+  nav.side ol > li > a {
+    display: block; padding: 7px 10px; border-radius: 7px; color: var(--muted);
+    font-size: 0.9rem; counter-increment: s;
+  }
+  nav.side ol > li > a::before { content: counter(s) ". "; color: var(--accent); font-variant-numeric: tabular-nums; }
+  nav.side ol > li > a:hover { background: var(--panel-2); color: var(--ink); text-decoration: none; }
+  nav.side ol > li > a.active { background: var(--green-soft); color: #d7f0e1; }
+  nav.side .subnav { list-style: none; margin: 2px 0 6px 14px; padding: 0; border-left: 1px solid var(--line); }
+  nav.side .subnav li a { display: block; padding: 4px 10px; font-size: 0.82rem; color: var(--muted); }
+  nav.side .subnav li a:hover { color: var(--ink); text-decoration: none; }
+
+  main { padding: 0 48px 120px; max-width: 1000px; }
+  header.hero {
+    padding: 64px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+  }
+  header.hero .kicker {
+    text-transform: uppercase; letter-spacing: 2px; font-size: 0.72rem; color: var(--accent); font-weight: 700;
+  }
+  header.hero h1 { font-size: 2.4rem; margin: 10px 0 6px; line-height: 1.15; }
+  header.hero p.lead { font-size: 1.12rem; color: var(--muted); max-width: 70ch; margin: 0; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+
+  section { padding: 40px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 20px; }
+  section > h2 { font-size: 1.6rem; margin: 0 0 6px; }
+  section > .sub { color: var(--muted); margin: 0 0 22px; max-width: 75ch; }
+  h3 { font-size: 1.18rem; margin: 30px 0 8px; }
+  h4 { font-size: 1.0rem; margin: 22px 0 6px; color: #cfe0d8; }
+  p { max-width: 78ch; }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 100px; font-size: 0.72rem;
+    font-weight: 600; border: 1px solid var(--line); background: var(--panel-2); color: var(--muted);
+    white-space: nowrap;
+  }
+  .badge.green { background: var(--green-soft); color: #74d7a0; border-color: #225f3e; }
+  .badge.amber { background: var(--amber-soft); color: #e8c272; border-color: #6a571f; }
+  .badge.red { background: var(--red-soft); color: #e89490; border-color: #6a2c2a; }
+  .badge.blue { background: var(--blue-soft); color: #88bdf0; border-color: #2c4f72; }
+
+  /* Cards */
+  .grid { display: grid; gap: 14px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .card h4 { margin-top: 0; }
+  .card p { margin: 6px 0 0; font-size: 0.92rem; color: var(--muted); }
+  .card.accent { border-left: 3px solid var(--accent); }
+
+  /* Callouts */
+  .callout {
+    border-radius: var(--radius); padding: 14px 18px; margin: 18px 0;
+    border: 1px solid var(--line); background: var(--panel);
+  }
+  .callout .tag { font-weight: 700; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 1px; }
+  .callout.why { border-left: 3px solid var(--blue); }
+  .callout.why .tag { color: var(--blue); }
+  .callout.warn { border-left: 3px solid var(--amber); }
+  .callout.warn .tag { color: var(--amber); }
+  .callout.key { border-left: 3px solid var(--green); }
+  .callout.key .tag { color: var(--accent); }
+  .callout p { margin: 6px 0 0; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: #cfe0d8; font-weight: 600; background: var(--panel); border-bottom: 1px solid var(--line); }
+  tr:hover td { background: rgba(31,157,87,0.05); }
+  td code { white-space: nowrap; }
+
+  /* Pipeline diagram */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 20px 0; }
+  .pipe .step {
+    flex: 1 1 150px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 14px; position: relative; min-width: 150px;
+  }
+  .pipe .step .n { font-size: 0.7rem; color: var(--accent); font-weight: 700; }
+  .pipe .step .t { font-weight: 600; font-size: 0.92rem; margin-top: 2px; }
+  .pipe .step .d { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .pipe .arrow { align-self: center; color: var(--line); padding: 0 6px; font-size: 1.2rem; }
+
+  .gate-row { display: grid; grid-template-columns: 200px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .gate-row:last-child { border-bottom: none; }
+  .gate-row .g-name { font-weight: 600; }
+  .gate-row .g-name code { display: inline-block; margin-top: 4px; }
+
+  ul.tight { margin: 8px 0; padding-left: 20px; }
+  ul.tight li { margin: 4px 0; max-width: 78ch; }
+  .lead-list li { margin: 10px 0; }
+
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
+  .kpi .k { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .kpi .k .big { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .kpi .k .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  footer { color: var(--muted); font-size: 0.82rem; padding: 30px 0 0; }
+  .toc-top { display: none; }
+
+  @media (max-width: 920px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav.side { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    main { padding: 0 20px 80px; }
+    .grid.cols-2, .grid.cols-3, .kpi { grid-template-columns: 1fr; }
+    .gate-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="side">
+  <div class="brand">Salone Explorer
+    <small>AI-Led SDLC Onboarding &middot; FambulTik / TpGroup (SL)</small>
+  </div>
+  <ol>
+    <li><a href="#overview">Start here</a></li>
+    <li><a href="#repo">The repository</a></li>
+    <li><a href="#harness">The AI-led harness</a></li>
+    <li><a href="#catalog">Tool catalog</a>
+      <ul class="subnav">
+        <li><a href="#rules">Rules</a></li>
+        <li><a href="#sessions">Sessions</a></li>
+        <li><a href="#hooks">Governance hooks</a></li>
+        <li><a href="#commands">Commands</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#agents">Subagents</a></li>
+        <li><a href="#mcp">MCP servers</a></li>
+        <li><a href="#tracking">Usage tracking</a></li>
+        <li><a href="#seo">SEO / GEO / AEO</a></li>
+      </ul>
+    </li>
+    <li><a href="#wiring">How it wires together</a></li>
+    <li><a href="#benefits">Why this exists</a></li>
+    <li><a href="#bestpractice">Best practices</a></li>
+    <li><a href="#start">Getting started</a></li>
+    <li><a href="#cheatsheet">Cheat sheet</a></li>
+  </ol>
+</nav>
+
+<main>
+  <header class="hero" id="overview">
+    <div class="kicker">Developer Onboarding</div>
+    <h1>Build Salone Explorer the AI-led way</h1>
+    <p class="lead">This repository ships more than an app specification. It ships an
+    <strong>AI-led software development lifecycle</strong>: a harness of rules, sessions, governance
+    hooks, slash commands, skills, and subagents that lets Claude Code do roughly 80% of the
+    engineering while a human keeps the accountable 20%. This page explains every moving part, how
+    they interlock, and why the result is cheaper in tokens, faster to ship, and harder to get wrong.</p>
+    <div class="hero-meta">
+      <span class="badge green">Stack: Vite + React + TypeScript</span>
+      <span class="badge green">Supabase + Tailwind</span>
+      <span class="badge green">Deploy: Vercel</span>
+      <span class="badge blue">Harness: .claude/</span>
+      <span class="badge amber">Source of truth: SPEC.md</span>
+    </div>
+  </header>
+
+  <!-- ================= START HERE ================= -->
+  <section id="overview-body">
+    <h2>What you are looking at</h2>
+    <p class="sub">A one-paragraph mental model before the detail.</p>
+    <p><strong>Salone Explorer</strong> is a Sierra Leone tour-guide single-page app published by
+    TpGroup (SL) Limited under the <strong>FambulTik</strong> brand. The product is defined entirely
+    in <code>SPEC.md</code>. The <code>.claude/</code> directory is the factory that turns that spec
+    into code: it tells Claude Code <em>what the rules are</em>, <em>where it is in the work</em>,
+    <em>what it is allowed to do</em>, and <em>how to verify what it built</em>. Nothing here is
+    decorative. Every file either constrains the AI, gives it memory, or gives it a repeatable
+    procedure.</p>
+
+    <div class="callout key">
+      <span class="tag">The one idea</span>
+      <p>Separate the <strong>intent</strong> (SPEC.md), the <strong>guardrails</strong> (rules + hooks),
+      the <strong>memory</strong> (sessions), and the <strong>procedures</strong> (skills + commands +
+      agents). Keep them distinct and the AI can move fast without drifting, because every step is
+      traceable to a source and checked by a gate.</p>
+    </div>
+
+    <div class="kpi">
+      <div class="k"><div class="big">8</div><div class="lbl">binding rules loaded every session</div></div>
+      <div class="k"><div class="big">9</div><div class="lbl">specialist subagents</div></div>
+      <div class="k"><div class="big">14</div><div class="lbl">repeatable skills</div></div>
+      <div class="k"><div class="big">6</div><div class="lbl">governance hooks enforcing the rules</div></div>
+    </div>
+  </section>
+
+  <!-- ================= REPO ================= -->
+  <section id="repo">
+    <h2>The repository and its keystone rule</h2>
+    <p class="sub">You cannot understand the tooling without the architecture it protects.</p>
+
+    <p>Every file in <code>src/</code> belongs to exactly one of three layers. This is the rule most
+    likely to be violated by an AI agent and the one that causes the most damage, so almost half the
+    harness exists to defend it.</p>
+
+    <table>
+      <thead><tr><th>Layer</th><th>Path</th><th>Holds</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge blue">Code</span></td><td><code>src/components/</code>, <code>src/pages/</code>, <code>src/lib/</code></td><td>React components, routing, business logic. <strong>No strings. No facts.</strong></td></tr>
+        <tr><td><span class="badge green">Data</span></td><td><code>src/data/*.json</code></td><td>Attraction records, region lookups, taxonomies.</td></tr>
+        <tr><td><span class="badge amber">Content</span></td><td><code>src/content/*.json</code></td><td>All user-facing strings, page copy, the disclaimer.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Code reads <em>facts</em> through the <code>attractions</code> repository (never importing JSON
+    directly) and reads <em>copy</em> through <code>t("namespace.key")</code>. A hard-coded English
+    string or attraction name anywhere under <code>src/components/</code>, <code>src/pages/</code>, or
+    <code>src/lib/</code> is a defect a grep will catch.</p>
+
+    <div class="callout why">
+      <span class="tag">Why it matters</span>
+      <p>The separation is the bridge to a future CMS (Phase 8, Payload). Code that reads facts through
+      a repository and copy through <code>t()</code> swaps its backing store - file JSON today,
+      Postgres via Supabase tomorrow, a CMS later - without a rewrite. Code that inlines facts and
+      strings has to be rebuilt. The harness refuses to let convenience erode that boundary.</p>
+    </div>
+  </section>
+
+  <!-- ================= HARNESS ================= -->
+  <section id="harness">
+    <h2>The AI-led harness and the 80 / 20 split</h2>
+    <p class="sub">A responsibility model, not a capability model.</p>
+
+    <p>The operating model divides the lifecycle between the AI and the human. The split is not about
+    what Claude <em>can</em> do - Claude can do the human's 20% too. It is about who is
+    <strong>accountable</strong>. Routing the accountable steps through a human is exactly what makes
+    this <strong>AI-led</strong> rather than AI-only.</p>
+
+    <div class="grid cols-2">
+      <div class="card accent">
+        <h4>The AI does the 80%</h4>
+        <p>Read SPEC + issue. Produce the context pack. Write the plan. Implement code, data, content,
+        tests, and docs inside the three-layer rule. Run the verification loop. Spawn first-pass code
+        and security review. Update README, headers, ADRs. Open the draft PR.</p>
+      </div>
+      <div class="card accent">
+        <h4>The human does the 20%</h4>
+        <p>Approve the plan before implementation. Sign off on architecture (ADRs) and any SPEC
+        deviation. Review the draft PR and apply judgement. Resolve ambiguous requirements. Final
+        security and business sign-off. <strong>Click merge</strong> - Claude is denied that action.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">Hard boundaries (enforced, not requested)</span>
+      <p>Claude must not <code>gh pr merge</code>, <code>git push --force</code>,
+      <code>git reset --hard</code>, or bypass hooks with <code>--no-verify</code>. It must not commit
+      secrets, and it must stop and ask before deviating from the architecture, the
+      <code>Attraction</code> type, the Supabase schema, the brand, accessibility, or the project
+      structure. These are enforced by <code>settings.json</code> deny-rules and hooks - see below.</p>
+    </div>
+  </section>
+
+  <!-- ================= CATALOG ================= -->
+  <section id="catalog">
+    <h2>The tool catalog</h2>
+    <p class="sub">Nine kinds of component. Each has one job.</p>
+    <p>The harness is layered: <strong>rules</strong> set the law, <strong>sessions</strong> hold
+    memory, <strong>hooks</strong> enforce mechanically, <strong>commands</strong> and
+    <strong>skills</strong> are the procedures you run, <strong>subagents</strong> are specialists you
+    delegate to, and <strong>MCP servers</strong> give the AI fast, structured access to code,
+    libraries, and GitHub. The remaining pieces - usage tracking and the SEO/GEO/AEO suite - are
+    capabilities layered on top.</p>
+
+    <!-- RULES -->
+    <h3 id="rules">Rules <span class="badge">.claude/rules/ &middot; loaded every session</span></h3>
+    <p>Eight markdown files that are <strong>binding</strong> and read into context at the start of
+    every session. Skills and agents assume them; they do not restate them. When a rule conflicts with
+    SPEC.md, SPEC.md wins.</p>
+    <table>
+      <thead><tr><th>Rule</th><th>What it governs</th></tr></thead>
+      <tbody>
+        <tr><td><code>three-layer-separation</code> <span class="badge green">keystone</span></td><td>Code vs data vs content. No strings or facts in <code>.tsx</code>/<code>.ts</code>. Repository pattern for all data access.</td></tr>
+        <tr><td><code>engineering-principles</code></td><td>The non-negotiables: plan before code, fail fast, validate at boundaries, no magic values, security up front, idiomatic style.</td></tr>
+        <tr><td><code>spec-first</code></td><td>No code without a traceable source - a SPEC phase/section, a GitHub issue, or an incident.</td></tr>
+        <tr><td><code>commit-conventions</code></td><td>Conventional type, 72-char subject, required <code>Requirement:</code>/<code>Phase:</code>/<code>Incident:</code> trailer, no AI signature.</td></tr>
+        <tr><td><code>branch-conventions</code></td><td>The <code>dev</code> -&gt; <code>main</code> model, branch naming, promotion and hotfix lifecycles.</td></tr>
+        <tr><td><code>test-conventions</code></td><td>Where tests live, how they are named, what each gate covers.</td></tr>
+        <tr><td><code>api-conventions</code></td><td>Contracts: the domain type, the repository interface, the Supabase schema, the content keys.</td></tr>
+        <tr><td><code>80-20-split</code></td><td>The AI-led operating model and the human-only responsibilities.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- SESSIONS -->
+    <h3 id="sessions">Sessions <span class="badge">.claude/sessions/ &middot; durable memory</span></h3>
+    <p>A session file is the <strong>only memory the next session has</strong>. It records goals,
+    timestamped updates, findings, decisions, blockers, outcomes, and the next-step handoff. Sessions
+    are mandatory for development work.</p>
+    <pre><code>/session-start &lt;phase|issue#&gt;   open a session, capture goals
+/session-update                 append a structured update after each step
+/session-current                show full state (goals, updates, blockers)
+/session-resume &lt;id&gt;            reactivate a paused session with its context
+/session-end                    write outcomes + next-session handoff, clear pointer</code></pre>
+    <div class="callout why">
+      <span class="tag">Why it matters (and saves tokens)</span>
+      <p>Without durable memory, every new session re-reads and re-derives the project from scratch -
+      expensive in tokens and error-prone. The session file lets the next run start from a written
+      summary of decisions and findings instead of rebuilding context. The <code>SessionStart</code>
+      hook surfaces it automatically.</p>
+    </div>
+
+    <!-- HOOKS -->
+    <h3 id="hooks">Governance hooks <span class="badge">.claude/hooks/ &middot; wired in settings.json</span></h3>
+    <p>Hooks are the teeth. They run automatically on Claude Code lifecycle events and can
+    <strong>block</strong> an action before it happens. The rules describe the law; the hooks enforce
+    it mechanically so compliance does not depend on the model remembering.</p>
+    <table>
+      <thead><tr><th>Event</th><th>Hook</th><th>Enforces</th></tr></thead>
+      <tbody>
+        <tr><td><code>SessionStart</code></td><td><code>session-start.sh</code></td><td>Loads active-session memory and recent history into context.</td></tr>
+        <tr><td><code>UserPromptSubmit</code></td><td><code>user-prompt-submit.sh</code></td><td>Blocks code-producing prompts that cite no SPEC phase/section or issue.</td></tr>
+        <tr><td><code>PreToolUse(Bash)</code></td><td><code>pre-tool-bash.sh</code></td><td>Secret-scans, requires a commit trailer, blocks force-push, <code>reset --hard</code>, <code>--no-verify</code>, <code>gh pr merge</code>.</td></tr>
+        <tr><td><code>PreToolUse(Edit)</code></td><td><code>pre-tool-edit.sh</code></td><td>Blocks new source files missing a one-line purpose header.</td></tr>
+        <tr><td><code>PostToolUse(Edit)</code></td><td><code>post-tool-edit.sh</code></td><td>Auto-runs ESLint <code>--fix</code> + Prettier on the edited file.</td></tr>
+        <tr><td><code>Stop</code></td><td><code>stop-session.sh</code></td><td>Nags if a session is left open; snapshots the transcript.</td></tr>
+      </tbody>
+    </table>
+    <p>Backing these, <code>settings.json</code> deny-rules hard-block the dangerous commands at the
+    permission layer too (defense in depth): <code>git push --force</code>, <code>git reset --hard</code>,
+    <code>git branch -D</code>, <code>git clean -f</code>, <code>commit --no-verify</code>,
+    <code>gh pr merge</code>, <code>rm -rf /</code>, <code>rm -rf ~</code>, and reads of
+    <code>.env</code>, <code>.pem</code>, <code>.key</code>, and <code>id_rsa</code> files.</p>
+
+    <!-- COMMANDS -->
+    <h3 id="commands">Slash commands <span class="badge">.claude/commands/ &middot; the procedures you type</span></h3>
+    <div class="grid cols-2">
+      <div class="card">
+        <h4>Workflow</h4>
+        <p><code>/orchestrate</code> turn an issue into routed, context-packed work (runs the four-check
+        pre-flight). <code>/issue-start</code> cut a feature branch. <code>/dev-start</code> run the dev
+        server. <code>/quality</code> full quality gate. <code>/code-push</code> conventional commit +
+        trailer + push. <code>/handoff</code> verify, review, open a draft PR. <code>/status</code>
+        one-shot work summary.</p>
+      </div>
+      <div class="card">
+        <h4>Session and tracking</h4>
+        <p><code>/session-start</code>, <code>/session-update</code>, <code>/session-end</code>,
+        <code>/session-current</code>, <code>/session-resume</code>, <code>/session-list</code>,
+        <code>/session-help</code>, <code>/session-autonomous-coding</code>, and <code>/tokens</code>
+        (per-project token usage report).</p>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <h3 id="skills">Skills <span class="badge">.claude/skills/ &middot; repeatable expertise</span></h3>
+    <p>A skill is a packaged procedure - a method the AI follows the same way every time, often with a
+    script behind it. Fourteen ship in this repo.</p>
+    <table>
+      <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>plan-then-code</code></td><td>Forces explore -&gt; plan -&gt; approve -&gt; code -&gt; verify -&gt; commit for any change beyond one line.</td></tr>
+        <tr><td><code>verification-loop</code></td><td>The single quality gate before handoff: secret scan, lint, typecheck, unit tests, build, a11y smoke, three-layer grep.</td></tr>
+        <tr><td><code>tdd-workflow</code></td><td>Failing tests first, then minimum code to pass, then refactor.</td></tr>
+        <tr><td><code>unit-testing</code> / <code>e2e-testing</code></td><td>Vitest units; Playwright user-journey end-to-end.</td></tr>
+        <tr><td><code>accessibility-testing</code></td><td>Playwright + axe against WCAG 2.2 AA - mirrors the a11y CI gate.</td></tr>
+        <tr><td><code>secret-scanning</code></td><td>Scans staged/modified files for secrets and absolute personal paths; blocks on any finding.</td></tr>
+        <tr><td><code>sierra-leone-tourist-expert</code></td><td>SME content gate - fact-checks attraction data and copy against the five approved sources; never invents facts.</td></tr>
+        <tr><td><code>seo-audit</code>, <code>geo</code>, <code>aeo</code>, <code>crawl-site</code>, <code>tech-stack-audit</code>, <code>audit-pptx</code></td><td>The SEO / GEO / AEO suite - see its own section below.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- AGENTS -->
+    <h3 id="agents">Subagents <span class="badge">.claude/agents/ + global &middot; specialists you delegate to</span></h3>
+    <p>A subagent runs in its <strong>own context window</strong> and returns only its conclusion. That
+    isolation is a token-saving and focus device: a fan-out search reads many files but hands back a
+    summary, not the file dumps, keeping the main thread lean.</p>
+    <table>
+      <thead><tr><th>Agent</th><th>Model</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td><code>architect</code></td><td>opus</td><td>Cross-layer change, new dependency, contract/schema change. Produces an ADR; never writes code.</td></tr>
+        <tr><td><code>orchestrator</code></td><td>opus</td><td>Entry point for an issue. Runs the spec-first pre-flight, writes a context pack, dispatches work.</td></tr>
+        <tr><td><code>product-analyst</code></td><td>sonnet</td><td>A vague issue needs a concrete spec + acceptance criteria before any code.</td></tr>
+        <tr><td><code>code-reviewer</code></td><td>sonnet</td><td>First-pass diff review - three-layer leaks, silent fallbacks, missing tests, drift from criteria.</td></tr>
+        <tr><td><code>security-reviewer</code></td><td>sonnet</td><td>Diffs touching auth, secrets, Supabase/RLS, env vars, rendering. Blocks handoff on high findings.</td></tr>
+        <tr><td><code>qa-engineer</code></td><td>sonnet</td><td>Author the test plan from acceptance criteria and run the verification loop.</td></tr>
+        <tr><td><code>docs-writer</code></td><td>sonnet</td><td>A diff changes behaviour/APIs/commands. Updates README, headers, ADRs, and the PR body.</td></tr>
+        <tr><td><code>seo-analyst</code>, <code>web-crawler</code></td><td>opus</td><td>SEO/GEO/AEO audits and site crawling - see the SEO section.</td></tr>
+      </tbody>
+    </table>
+    <p>Three more are installed globally and shared across all projects:
+    <code>graph-explore</code> (graph-first codebase navigation), <code>graph-impact</code>
+    (blast-radius before a refactor), and <code>graph-review</code> (risk-scored review). They are
+    backed by the <code>code-review-graph</code> MCP and report using roughly 70-90% fewer tokens than
+    text-based search for the same questions.</p>
+
+    <!-- MCP -->
+    <h3 id="mcp">MCP servers <span class="badge">.mcp.json</span></h3>
+    <div class="grid cols-2">
+      <div class="card"><h4>code-review-graph</h4><p>A queryable knowledge graph of the codebase. Structural questions ("what depends on X", "where is Y defined") resolve by graph lookup instead of repeated full-text reads - faster and far cheaper in tokens.</p></div>
+      <div class="card"><h4>context7</h4><p>Live, version-correct library documentation on demand. Stops the AI guessing an API from stale training data.</p></div>
+      <div class="card"><h4>github</h4><p>Issues, PRs, and project boards. Lets <code>/orchestrate</code> read an issue and the workflow open a draft PR.</p></div>
+      <div class="card"><h4>filesystem</h4><p>Scoped file access for the harness tooling.</p></div>
+    </div>
+
+    <!-- TRACKING -->
+    <h3 id="tracking">Usage tracking <span class="badge">statusline + /tokens + session snapshot</span></h3>
+    <p>You cannot optimize what you do not measure. Three mechanisms make token and time cost visible:</p>
+    <ul class="tight">
+      <li><strong>Live statusline</strong> - <code>statusline.sh</code> shows the branch, issue,
+      session, diff, and a live <code>time:&lt;elapsed&gt; cost:$&lt;usd&gt;</code> read straight from
+      Claude Code's own status payload.</li>
+      <li><strong><code>/tokens</code></strong> - runs <code>token-report.py</code> over this project's
+      transcripts only, deduped by message id, Claude-only. Exact input/output/cache token counts per
+      day or per session. No cross-project or cross-tool leakage.</li>
+      <li><strong>Session-end snapshot</strong> - <code>/session-end</code> stamps the session file
+      with total coding time and a token summary, so each session leaves a durable record.</li>
+    </ul>
+    <p>Cost in the report is opt-in: rates live in <code>.claude/config/model-pricing.json</code> and
+    ship as <code>null</code>, so no price is ever fabricated. The live statusline already shows
+    Claude Code's authoritative cost.</p>
+
+    <!-- SEO -->
+    <h3 id="seo">SEO / GEO / AEO suite <span class="badge">ported in &middot; backs SPEC 13.3</span></h3>
+    <p>A visibility toolkit for the three ways modern audiences find a site: classic search, AI answer
+    engines, and AI generative assistants.</p>
+    <table>
+      <thead><tr><th>Tool</th><th>Stands for</th><th>Audits</th></tr></thead>
+      <tbody>
+        <tr><td><code>seo-audit</code></td><td>Search Engine Optimization</td><td>Per-URL signals, duplicate detection, structured data coverage, crawl budget, markdown reports.</td></tr>
+        <tr><td><code>geo</code></td><td>Generative Engine Optimization</td><td>How ChatGPT, Claude, Perplexity, Gemini discover and cite the site - <code>llms.txt</code>, entity authority, AI-crawler access.</td></tr>
+        <tr><td><code>aeo</code></td><td>Answer Engine Optimization</td><td>Featured snippets, People-Also-Ask, FAQ schema, voice-search and direct-answer readiness.</td></tr>
+        <tr><td><code>crawl-site</code></td><td>-</td><td>Content inventory with per-URL metadata, status, headings, links, schema types.</td></tr>
+        <tr><td><code>tech-stack-audit</code></td><td>-</td><td>Fingerprints CMS, frameworks, libraries, third-party services, security headers.</td></tr>
+        <tr><td><code>audit-pptx</code></td><td>-</td><td>Turns audit output into a client-ready PowerPoint deck.</td></tr>
+      </tbody>
+    </table>
+    <p>Driven by two agents: <code>seo-analyst</code> (SEO + GEO + structured data) and
+    <code>web-crawler</code> (discovery + the GEO/AEO skills). Python dependencies install on first run
+    from each skill's documented <code>pip3 install</code> line.</p>
+  </section>
+
+  <!-- ================= WIRING ================= -->
+  <section id="wiring">
+    <h2>How it all wires together</h2>
+    <p class="sub">The pieces are not a menu - they form one pipeline, gated at every step.</p>
+
+    <h3>The daily loop</h3>
+    <div class="pipe">
+      <div class="step"><div class="n">01</div><div class="t">/session-start</div><div class="d">Open memory, capture goals.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">02</div><div class="t">/orchestrate</div><div class="d">Four-check pre-flight, context pack, route to a specialist.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">03</div><div class="t">plan-then-code</div><div class="d">Plan, get human approval, then implement.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">04</div><div class="t">/quality</div><div class="d">Verification loop: lint, types, tests, a11y, secrets, build.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">05</div><div class="t">/code-push</div><div class="d">Conventional commit + trailer, push to dev.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">06</div><div class="t">/handoff</div><div class="d">Reviews + draft PR. Human merges.</div></div>
+      <div class="arrow">&rsaquo;</div>
+      <div class="step"><div class="n">07</div><div class="t">/session-end</div><div class="d">Write outcomes for the next session.</div></div>
+    </div>
+
+    <h3>The gates that fire along the way</h3>
+    <p>Each step is wrapped by an enforcement layer. You do not have to remember the rules - the harness
+    refuses the action if you stray.</p>
+
+    <div class="card">
+      <div class="gate-row">
+        <div class="g-name">Prompt that asks for code <code>UserPromptSubmit</code></div>
+        <div>Blocked unless it cites a SPEC phase/section or a GitHub issue, or runs inside an
+        issue-linked session. No untraceable code gets written.</div>
+      </div>
+      <div class="gate-row">
+        <div class="g-name">A new source file <code>PreToolUse(Edit)</code></div>
+        <div>Blocked unless it carries a one-line purpose header. Every file self-documents.</div>
+      </div>
+      <div class="gate-row">
+        <div class="g-name">After any edit <code>PostToolUse(Edit)</code></div>
+        <div>ESLint <code>--fix</code> and Prettier run automatically. Style never drifts; review stays
+        about substance.</div>
+      </div>
+      <div class="gate-row">
+        <div class="g-name">Any commit <code>PreToolUse(Bash)</code></div>
+        <div>Secret scan must pass; a <code>Requirement:</code>/<code>Phase:</code>/<code>Incident:</code>
+        trailer must be present; <code>--no-verify</code>, force-push and <code>reset --hard</code> are
+        refused.</div>
+      </div>
+      <div class="gate-row">
+        <div class="g-name">Before handoff <code>verification-loop</code></div>
+        <div>Lint, typecheck, unit tests, build, a11y smoke, and the three-layer grep all run green, plus
+        <code>code-reviewer</code> and <code>security-reviewer</code> first-pass.</div>
+      </div>
+      <div class="gate-row">
+        <div class="g-name">Merge <code>settings.json</code> deny</div>
+        <div>Claude cannot <code>gh pr merge</code>. A human applies judgement and merges. The 80/20
+        boundary is mechanical, not honor-system.</div>
+      </div>
+    </div>
+
+    <div class="callout key">
+      <span class="tag">The wiring in one sentence</span>
+      <p>SPEC.md sets intent -&gt; the orchestrator proves the work is traceable and routes it -&gt;
+      plan-then-code gets human approval -&gt; rules and hooks constrain every edit and command -&gt;
+      the verification loop and reviewers prove quality -&gt; sessions record what happened -&gt; a
+      human merges.</p>
+    </div>
+  </section>
+
+  <!-- ================= BENEFITS ================= -->
+  <section id="benefits">
+    <h2>Why this exists - the payoff</h2>
+    <p class="sub">Four returns: cheaper tokens, faster flow, higher quality, and security/performance by construction.</p>
+
+    <h3>1. It saves tokens</h3>
+    <ul class="lead-list">
+      <li><strong>Structured retrieval over brute-force reading.</strong> The
+      <code>code-review-graph</code> MCP and the graph subagents answer structural questions by graph
+      lookup - their own definition cites roughly <strong>70-90% fewer tokens</strong> than text search
+      for the same task.</li>
+      <li><strong>Subagents return conclusions, not file dumps.</strong> A fan-out search burns its
+      tokens in an isolated context and hands back a summary, so the main thread never pays to hold
+      every file it touched.</li>
+      <li><strong>Durable session memory.</strong> The next session reads a written summary of decisions
+      and findings instead of re-deriving the whole project - the single biggest repeat-cost in
+      long-running AI work.</li>
+      <li><strong>context7 instead of guess-and-correct.</strong> Pulling the correct library API once
+      is cheaper than generating wrong code, failing, and regenerating.</li>
+      <li><strong>The three-layer rule prevents rework.</strong> Code that would have to be rebuilt to
+      reach the CMS is the most expensive kind of token spend - the rework. The rule eliminates it up
+      front.</li>
+      <li><strong>You measure it.</strong> <code>/tokens</code> and the live statusline turn token cost
+      from invisible to a number you watch, so waste gets caught.</li>
+    </ul>
+
+    <h3>2. It makes the workflow efficient</h3>
+    <ul class="lead-list">
+      <li><strong>One pipeline, not a blank page.</strong> Every task follows the same loop, so there is
+      no per-task improvisation about process.</li>
+      <li><strong>Auto-formatting on save</strong> removes lint/format churn from the human loop
+      entirely.</li>
+      <li><strong>The orchestrator pre-flight</strong> catches missing specs, unmet phase
+      preconditions, and unmet dependencies <em>before</em> an engineer starts - failing fast instead of
+      mid-build.</li>
+      <li><strong>Specialist routing.</strong> Vague issue -&gt; product-analyst; cross-layer -&gt;
+      architect; data/content -&gt; the SME gate. The right method, automatically.</li>
+    </ul>
+
+    <h3>3. It ensures high quality</h3>
+    <ul class="lead-list">
+      <li><strong>Quality is a gate, not a hope.</strong> The verification loop must be green before
+      handoff: lint, typecheck, unit, a11y, build, and the three-layer grep.</li>
+      <li><strong>Two independent reviewers</strong> (code and security) run on every diff, tuned to the
+      failure modes AI-generated code is statistically prone to - silent fallbacks, dead error handling,
+      spurious abstractions, missing tests.</li>
+      <li><strong>An SME content gate</strong> blocks invented attraction facts; unconfirmed facts must
+      be marked, never guessed.</li>
+      <li><strong>Accessibility is CI-blocking</strong> - serious or critical axe violations on the five
+      smoke routes fail the build.</li>
+    </ul>
+
+    <h3>4. It is secure and performant by construction</h3>
+    <ul class="lead-list">
+      <li><strong>Secrets cannot be committed</strong> - the scanner blocks the commit, and reads of
+      <code>.env</code>/<code>.pem</code>/<code>.key</code> are denied at the permission layer.</li>
+      <li><strong>Only <code>VITE_</code>-prefixed env vars reach the browser</strong>; the Supabase
+      service-role key never does.</li>
+      <li><strong>Row-Level Security on every user-scoped table</strong> with <code>auth.uid() = user_id</code>
+      policies - the security-reviewer blocks handoff on RLS gaps.</li>
+      <li><strong>Performance and security are first-class non-functional requirements</strong> in the
+      engineering rules - designed in up front, not bolted on. The SEO/GEO/AEO suite and the a11y gate
+      keep the shipped site fast and discoverable.</li>
+    </ul>
+  </section>
+
+  <!-- ================= BEST PRACTICES ================= -->
+  <section id="bestpractice">
+    <h2>AI-led SDLC best practices, and why they matter</h2>
+    <p class="sub">The principles the harness encodes. Each exists because skipping it has a known cost.</p>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h4>Spec-first, always</h4>
+        <p>No code without a traceable source. <strong>Why:</strong> an AI will happily build the wrong
+        thing convincingly. Tracing every change to a SPEC section or issue keeps output aligned with
+        intent and makes review tractable.</p>
+      </div>
+      <div class="card">
+        <h4>Plan before code</h4>
+        <p>Produce a plan and get human approval before editing production files. <strong>Why:</strong>
+        the cheapest place to catch a wrong approach is the plan, before any tokens or trust are spent on
+        an implementation.</p>
+      </div>
+      <div class="card">
+        <h4>Keep humans on the accountable steps</h4>
+        <p>Plan approval, architecture sign-off, and merge stay human. <strong>Why:</strong> AI-led is a
+        responsibility model. Accountability for irreversible decisions must sit with a person.</p>
+      </div>
+      <div class="card">
+        <h4>Separate intent, memory, and procedure</h4>
+        <p>SPEC vs sessions vs skills. <strong>Why:</strong> conflating them is how context windows
+        overflow and drift creeps in. Clean separation keeps each artefact small and selectively
+        readable.</p>
+      </div>
+      <div class="card">
+        <h4>Enforce mechanically, not by reminder</h4>
+        <p>Hooks block; they do not advise. <strong>Why:</strong> a model that "knows" a rule still
+        breaks it under pressure. A hook that blocks the commit does not.</p>
+      </div>
+      <div class="card">
+        <h4>Fail fast, no silent fallbacks</h4>
+        <p>Validate at every boundary; raise loudly with context. <strong>Why:</strong> a silent fallback
+        hides the bug until production. Explicit failure with the failing input is debuggable.</p>
+      </div>
+      <div class="card">
+        <h4>Smallest viable diff</h4>
+        <p>Edit only what the phase requires; no drive-by refactors. <strong>Why:</strong> small diffs
+        review faster, regress less, and keep token cost proportional to the actual change.</p>
+      </div>
+      <div class="card">
+        <h4>Verify before handoff</h4>
+        <p>The full gate runs green before a PR opens. <strong>Why:</strong> review time is the scarce
+        resource. Never spend a human's attention on something a machine could have caught.</p>
+      </div>
+      <div class="card">
+        <h4>Write the memory down</h4>
+        <p>End every session with outcomes and a next-step handoff. <strong>Why:</strong> undocumented
+        context is lost context, and lost context is re-derived at full token price.</p>
+      </div>
+      <div class="card">
+        <h4>Measure cost continuously</h4>
+        <p>Token and time usage are always on screen. <strong>Why:</strong> efficiency you cannot see is
+        efficiency you cannot improve.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GETTING STARTED ================= -->
+  <section id="start">
+    <h2>Getting started</h2>
+    <p class="sub">One-time activation, then the daily loop.</p>
+
+    <h3>One-time activation (human only)</h3>
+    <p>Two files configure Claude's own permissions and cannot be auto-written by Claude. Activate them
+    yourself, review first, then restart Claude Code.</p>
+    <pre><code># 1. Install the harness settings (already done in this repo if settings.json exists).
+mv .claude/settings.json.proposed .claude/settings.json
+
+# 2. Create your local, gitignored overrides + GitHub token for the MCP.
+cp .claude/settings.local.json.template .claude/settings.local.json
+#    then set GITHUB_PERSONAL_ACCESS_TOKEN in settings.local.json
+
+# 3. Restart Claude Code so it loads settings.json, hooks, and .mcp.json.</code></pre>
+    <p>After this the status line, hooks, <code>lead-developer</code> output style, and MCP servers are
+    live. Node 20+ is required for the app commands once Phase 1 has scaffolded
+    <code>package.json</code>.</p>
+
+    <h3>Your first task, end to end</h3>
+    <pre><code>/session-start phase-3-accessibility    # or /session-start &lt;issue#&gt;
+/orchestrate &lt;github-issue-url&gt;         # pre-flight + context pack + routing
+# ... the plan is presented; a human approves it ...
+# ... implement inside the three-layer rule, /session-update as you go ...
+/quality                                # full gate: lint, types, tests, a11y, secrets, build
+/code-push "feat: ..."                  # conventional commit + trailer + push to dev
+/handoff                                # verification + reviews + draft PR
+/session-end                            # outcomes + next-session handoff
+/tokens                                 # see what the session cost</code></pre>
+    <p>For long, low-supervision runs: <code>/session-autonomous-coding &lt;issue#&gt;</code>.</p>
+  </section>
+
+  <!-- ================= CHEAT SHEET ================= -->
+  <section id="cheatsheet" style="border-bottom:none;">
+    <h2>Cheat sheet</h2>
+    <p class="sub">The commands you will reach for daily.</p>
+    <table>
+      <thead><tr><th>Command</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td><code>/session-start</code> / <code>/session-end</code></td><td>Open / close the durable session that carries memory across runs.</td></tr>
+        <tr><td><code>/orchestrate &lt;issue&gt;</code></td><td>Spec-first pre-flight, context pack, route to the right specialist.</td></tr>
+        <tr><td><code>/quality</code></td><td>Run the full verification gate.</td></tr>
+        <tr><td><code>/code-push "msg"</code></td><td>Commit with conventions and trailer, then push to <code>dev</code>.</td></tr>
+        <tr><td><code>/handoff</code></td><td>Verify, spawn reviews, open a draft PR. Humans merge.</td></tr>
+        <tr><td><code>/tokens</code></td><td>Per-project token usage report (add <code>--by-session</code>).</td></tr>
+        <tr><td><code>/status</code></td><td>One-shot summary of work in progress.</td></tr>
+        <tr><td><code>/geo</code> / <code>/aeo</code> / <code>/seo-audit</code></td><td>Run a generative / answer / search visibility audit on a URL.</td></tr>
+      </tbody>
+    </table>
+
+    <footer>
+      <p>This page mirrors the authoritative sources and is secondary to them: <code>SPEC.md</code>
+      (single source of truth), <code>CLAUDE.md</code>, the binding files in <code>.claude/rules/</code>,
+      and <code>docs/dev-guide/claude-harness.md</code>. When they disagree, SPEC.md wins. Generated as
+      developer onboarding for the Salone Explorer repository.</p>
+    </footer>
+  </section>
+</main>
+</div>
+
+<script>
+  // Scrollspy: highlight the current section in the sidebar. Vanilla, no deps.
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.side a[href^="#"]'));
+    var map = {};
+    links.forEach(function (l) {
+      var id = l.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) map[id] = l;
+    });
+    var targets = Object.keys(map).map(function (id) { return document.getElementById(id); });
+    if (!('IntersectionObserver' in window) || !targets.length) return;
+    var seen = new Set();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) seen.add(e.target.id); else seen.delete(e.target.id);
+      });
+      // Activate the topmost currently-visible section.
+      var current = targets.filter(function (t) { return seen.has(t.id); })[0];
+      if (!current) return;
+      links.forEach(function (l) { l.classList.remove('active'); });
+      var top = current.id;
+      // Map body sub-sections back to their top-level nav item where needed.
+      if (map[top]) map[top].classList.add('active');
+    }, { rootMargin: '-10% 0px -80% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  })();
+</script>
+</body>
+</html>

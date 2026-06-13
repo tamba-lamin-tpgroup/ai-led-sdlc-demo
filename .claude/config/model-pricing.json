@@ -1,0 +1,15 @@
+{
+  "_file": "model-pricing.json - per-model USD rates for token-report.py cost column",
+  "_units": "USD per 1,000,000 tokens",
+  "_source": "https://www.anthropic.com/pricing - set the real rates here; left null so cost is never fabricated",
+  "_updated": "unset",
+  "_note": "While rates are null the report prints exact token counts and 'cost: n/a'. The live statusline already shows authoritative cost from Claude Code itself, so filling these in is optional.",
+  "models": {
+    "claude-opus-4-8": {
+      "input": null,
+      "output": null,
+      "cache_write": null,
+      "cache_read": null
+    }
+  }
+}

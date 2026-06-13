@@ -1,0 +1,42 @@
+# --- OS / editor ---
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# --- Node / Vite (post-scaffold) ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!tokens.css
+
+# --- Python bytecode (harness scripts) ---
+__pycache__/
+*.pyc
+
+# --- Claude Code harness ---
+# Per-developer local overrides (copy from settings.local.json.template).
+.claude/settings.local.json
+# Staged settings proposal (move into place as settings.json, then delete).
+.claude/settings.json.proposed
+# Transient session pointer + per-day stop-hook logs (the .md session files
+# ARE the durable memory and stay tracked).
+.claude/sessions/.current-session
+.claude/sessions/*.log
+# Transient Copilot-review watch artifacts (regenerated per PR by
+# .claude/scripts/copilot-review.sh; not durable memory).
+.claude/sessions/copilot-review-*.json
+# Tool-call + transcript observability (machine-local, high churn).
+.claude/observability/

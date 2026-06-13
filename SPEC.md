@@ -2,11 +2,16 @@
 
 > **Publisher:** TpGroup (SL) Limited
 > **Brand:** **FambulTik** — TpGroup's heritage-and-diaspora subsidiary
-> **Repository:** `git@github.com:click2tman/ai-led-sdlc-demo.git`
+> **Repository:** `git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git`
+> **Production domain:** `slint-ai-led-sdlc.tpgroupsl.com`
+> **Vercel project:** `slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo` ([dashboard](https://vercel.com/slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo))
+> **Supabase project:** `slint-ai-led-sdlc-demo`
 > **Design system:** [TpGroup Design System](https://design.tpgroupsl.com/) (multi-brand, WCAG 2.2 AA)
 > **Disclaimer:** *This application is built for demonstration and educational purposes only. It is not an official tourism service. Information is curated from public sources and may be out of date — confirm details with the operator before travelling.*
 
 > **Purpose:** Build a deployable Sierra Leone tour-guide web app using Claude Code. Phase 1 (~45 min) ships a static, public-facing site. Phase 2 (~45–60 min) adds Supabase-backed auth, bookmarks, favorites, account view, and tour scheduling. Phase 8 (future) replaces file-based content with **Payload CMS**. Throughout, the app conforms to the TpGroup Design System under the **FambulTik** brand, meets **WCAG 2.2 Level AA**, is fully responsive, SEO- and GEO-optimised, structured-data-rich, and protected by SAST in CI. This spec is the single source of truth — read it fully before generating any code.
+
+> **⚠️ Live-demo scope:** This repository hosts the **live, in-class demonstration**, which delivers **Phase 1 — Static foundation only**. The full roadmap below (Phases 1–11) documents the complete architectural endpoint so the Phase 1 decisions are understood in context, but **only Phase 1 is built in this demo** — Phase 2 and later are out of scope here and serve as reference. The app is scaffolded into `salone-explorer/` live during the demo; it is intentionally absent from this repository at the start.
 
 ---
 
@@ -36,11 +41,12 @@
 - **All UI strings loaded from `src/content/strings.en.json`**.
 - FambulTik branded UI; TpGroup Design System tokens.
 - WCAG 2.2 Level AA conformance.
-- SEO, GEO, JSON-LD, SAST.
+- SEO, AEO, GEO, JSON-LD, SAST.
 - Public GitHub repo + Vercel deploy.
 
 ### Phase 2 — Authenticated features (~45–60 min)
 - Supabase email/password auth.
+- Social login: Google, Facebook, LinkedIn (alongside email/password).
 - Bookmarks, favorites, scheduled tours.
 - *My Account* page.
 - RLS on every user-scoped table.
@@ -51,10 +57,24 @@
 - Editorial team manages attractions, strings, labels, page copy, disclaimer, FAQ entries through the Payload admin UI.
 - Salone Explorer becomes a pure presentation layer; CMS owns all content.
 
+### Phase 9+ — Production extensions (post-class, beyond the class time budget)
+These move Salone Explorer from a teaching demo toward a transactional
+product. They are specified here but are **not** part of the in-class
+build (Phases 1–7) and carry their own non-functional weight (server
+compute, secrets, moderation, legal).
+- **Phase 9 — Real-time reviews.** Authenticated, user-submitted reviews
+  with live updates (Supabase Realtime), moderation, and an
+  `aggregateRating` that feeds the JSON-LD graph (§14).
+- **Phase 10 — Email notifications.** Transactional email for booking and
+  review events via Supabase Edge Functions + an email provider.
+- **Phase 11 — Payments (Stripe).** Tour-deposit payments via Stripe,
+  processed server-side in Edge Functions with webhook verification.
+  **Activating this phase requires revising the §17 disclaimer.**
+
 ### Out of scope (all phases)
-- Payment or real bookings.
-- Real-time reviews or social comments.
-- Email or SMS notifications.
+- SMS notifications.
+- A native mobile app.
+- User-to-user social comments or direct messaging.
 
 ---
 
@@ -74,13 +94,18 @@
 | **Content layer**| `src/content/*.json` strings module     | All copy externalised; CMS-ready.                  |
 | **Backend (P2)** | **Supabase** (Postgres + Auth + RLS)    | Provisioned via Vercel ↔ Supabase integration.     |
 | **Client SDK**   | `@supabase/supabase-js` v2              | Official client; works in browser.                 |
+| **Auth providers (P6)** | Supabase Auth: email/password + Google, Facebook, LinkedIn OAuth | Social sign-in; provider secrets held in Supabase, never in the client. |
+| **Realtime (P9)** | Supabase Realtime                      | Live review updates over Postgres changes.         |
+| **Server compute (P10, P11)** | **Supabase Edge Functions** (Deno) | Holds Stripe + email secrets, webhook handling, email sends; no secret reaches the browser. |
+| **Email (P10)**  | Transactional provider (e.g. Resend) via Edge Function | Booking/review notifications; API key is an Edge Function secret. |
+| **Payments (P11)** | **Stripe** (`@stripe/stripe-js` client + Stripe SDK server-side in Edge Functions) | Tour-deposit checkout; PCI scope handled by Stripe Checkout/Elements. |
 | Maps             | Google Maps deep links                  | No API key required.                               |
 | Pre-render       | **vite-plugin-prerender**               | Static HTML for crawlers and LLM ingestion.        |
 | SEO              | sitemap.xml, robots.txt, canonical URLs | Crawlable.                                         |
 | GEO              | llms.txt, semantic content patterns     | Visibility in generative AI answers.               |
 | Structured data  | Schema.org JSON-LD (`@graph`)           | Entity relationships across pages.                 |
 | Deployment       | **Vercel** (framework preset = Vite)    | One-click deploy on push.                          |
-| Version control  | **GitHub** (`click2tman/ai-led-sdlc-demo`) | Required for Vercel auto-deploy and CI.         |
+| Version control  | **GitHub** (`tamba-lamin-tpgroup/ai-led-sdlc-demo`) | Required for Vercel auto-deploy and CI.         |
 | CI / SAST        | GitHub Actions — CodeQL, Semgrep, npm audit, axe-core | Static security + a11y checks.       |
 | Dep updates      | Dependabot                              | Weekly supply-chain refresh.                       |
 
@@ -423,6 +448,59 @@ A small lookup file mapping Sierra Leone districts to provinces — used to rend
 ]
 ```
 
+### 6.6 Production-extension schema (Phases 9–11, draft)
+
+These tables are introduced in their respective phases, **not** in
+Phase 2. Each ships with RLS in the same migration. The existing §6.3
+tables are unchanged. Finalise via an architect ADR before building.
+
+```sql
+-- Phase 9: reviews (one published review per user per attraction)
+create table public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  attraction_id text not null,
+  rating int not null check (rating between 1 and 5),
+  body text not null check (char_length(body) between 1 and 2000),
+  status text not null default 'published'
+    check (status in ('published', 'flagged', 'removed')),
+  created_at timestamptz not null default now(),
+  unique (user_id, attraction_id)
+);
+create index on public.reviews (attraction_id, status);
+alter table public.reviews enable row level security;
+-- Public reads published reviews; authors read/manage their own.
+create policy "published reviews read" on public.reviews
+  for select using (status = 'published' or auth.uid() = user_id);
+create policy "own review insert" on public.reviews
+  for insert with check (auth.uid() = user_id);
+create policy "own review update" on public.reviews
+  for update using (auth.uid() = user_id);
+create policy "own review delete" on public.reviews
+  for delete using (auth.uid() = user_id);
+
+-- Phase 11: payments (a deposit against a tour booking)
+create type payment_status as enum
+  ('requires_payment', 'paid', 'refunded', 'failed');
+create table public.payments (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  booking_id uuid not null references public.tour_bookings(id) on delete cascade,
+  stripe_payment_intent_id text unique,
+  amount_cents int not null check (amount_cents >= 0),
+  currency text not null default 'usd',
+  status payment_status not null default 'requires_payment',
+  created_at timestamptz not null default now()
+);
+create index on public.payments (user_id);
+alter table public.payments enable row level security;
+-- Users read their own payments. Status is written ONLY by the Edge
+-- Function (service role bypasses RLS) from a verified Stripe webhook;
+-- there is deliberately no client insert/update policy.
+create policy "own payments read" on public.payments
+  for select using (auth.uid() = user_id);
+```
+
 ---
 
 ## 7. Pages & Routes
@@ -556,12 +634,17 @@ Tokens trace back to the TpGroup DS foundations and are themed for FambulTik.
 - **Get Directions** button (`t("attraction.directions.cta")`).
 - **(P2)** Action bar: Bookmark, Favorite, *Schedule a Tour*.
 - FAQ accordion (from `faqs[]`).
+- **(P9)** Reviews: published-reviews list that updates live (Supabase
+  Realtime) + an auth-gated submit form (rating 1–5 + body). Strings via
+  `t("reviews.*")`; feeds `aggregateRating`.
 - Sources footer.
 
 ### 9.4 Schedule a Tour (P2)
 - Dialog opened from detail page.
 - Fields: tour date, party size (1–20), notes.
 - Submit → `tour_bookings` insert; toast `t("schedule.success")`.
+- **(P11)** Optional deposit: Stripe Checkout/Elements; the booking is
+  marked paid only on a verified Stripe webhook, never client-side.
 
 ### 9.5 My Account (`/account`) — P2
 1. Profile — email, member-since, sign-out.
@@ -573,6 +656,9 @@ Empty states (DS EmptyState) for each section, copy from `t("account.*.empty")`.
 
 ### 9.6 Sign in / Sign up
 - DS Form Fields. Email + password.
+- **(P6)** Social sign-in buttons — Google, Facebook, LinkedIn — via
+  `supabase.auth.signInWithOAuth`; labels from `t("auth.social.*")`,
+  provider marks per brand guidelines.
 - Errors mapped from `errors.auth.*` keys.
 
 ### 9.7 About (`/about`)
@@ -653,93 +739,108 @@ Salone Explorer **must** conform to WCAG 2.2 Level AA. The TpGroup Design System
 
 ## 12. Project Structure
 
+The shippable app and the AI-led SDLC tooling live in **separate trees**.
+The repository root holds the spec, docs, CI config, and the `.claude/`
+harness; the application is scaffolded into a `salone-explorer/`
+subdirectory. **Vercel's Root Directory is set to `salone-explorer`**, so
+the deployment is built only from that folder and never contains the
+harness or docs. GitHub Actions workflows live at the repository root
+(`.github/` cannot live in a subfolder) and run with
+`working-directory: salone-explorer`.
+
 ```
-salone-explorer/
+ai-led-sdlc-demo/                  # repository root (NOT deployed)
 ├── .github/
-│   ├── workflows/
+│   ├── workflows/                 # CI; jobs set working-directory: salone-explorer
 │   │   ├── ci.yml
 │   │   ├── codeql.yml
 │   │   ├── security.yml
 │   │   └── a11y.yml
 │   └── dependabot.yml
-├── index.html
-├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-├── tsconfig.json
-├── package.json
-├── .env.example
-├── public/
-│   ├── robots.txt
-│   ├── sitemap.xml
-│   ├── llms.txt
-│   └── favicon.svg
-├── scripts/
-│   ├── generate-sitemap.ts
-│   └── migrate-attractions-to-supabase.ts  # Phase 2.5 (optional)
-├── supabase/
-│   └── schema.sql
-├── tests/
-│   └── a11y/
-│       └── smoke.spec.ts
-└── src/
-    ├── main.tsx                    # router + HelmetProvider + AuthProvider
-    ├── App.tsx
-    ├── index.css                   # imports tokens.css + tailwind
-    ├── assets/
-    │   └── brand/fambultik/
-    │       ├── logo-light.svg
-    │       ├── logo-dark.svg
-    │       └── favicon.svg
-    ├── styles/
-    │   └── tokens.css              # CSS variables (§8.4)
-    ├── data/                       # ── DATA LAYER ────────────────
-    │   ├── types.ts                # Attraction type
-    │   ├── attractions.json        # 8 records, sourced from §4
-    │   └── regions.json            # district → province lookup
-    ├── content/                    # ── CONTENT LAYER ─────────────
-    │   ├── strings.en.json         # flat key→string map
-    │   └── pages/                  # longer-form copy (optional)
-    │       ├── home.json
-    │       └── about.json
-    ├── lib/                        # ── CODE LAYER ────────────────
-    │   ├── supabase.ts
-    │   ├── content/
-    │   │   ├── attractions.ts          # AttractionRepository interface
-    │   │   ├── attractions.file.ts     # JSON implementation
-    │   │   ├── attractions.supabase.ts # Supabase implementation (P2.5)
-    │   │   ├── strings.ts              # t() helper
-    │   │   └── index.ts                # barrel; picks active impl
-    │   ├── bookmarks.ts
-    │   └── bookings.ts
-    ├── seo/
-    │   ├── SeoHead.tsx
-    │   ├── JsonLd.tsx
-    │   └── graph.ts
-    ├── auth/
-    │   ├── AuthProvider.tsx
-    │   └── ProtectedRoute.tsx
-    ├── components/
-    │   ├── NavBar.tsx
-    │   ├── Footer.tsx
-    │   ├── FambulTikLogo.tsx
-    │   ├── AttractionCard.tsx
-    │   ├── RatingBadge.tsx
-    │   ├── HoursBlock.tsx
-    │   ├── DirectionsButton.tsx
-    │   ├── SourcesList.tsx
-    │   ├── FaqAccordion.tsx
-    │   ├── BookmarkButton.tsx
-    │   ├── FavoriteButton.tsx
-    │   └── ScheduleTourModal.tsx
-    └── pages/
-        ├── HomePage.tsx
-        ├── AttractionDetailPage.tsx
-        ├── AboutPage.tsx
-        ├── SignInPage.tsx
-        ├── SignUpPage.tsx
-        ├── AccountPage.tsx
-        └── NotFoundPage.tsx
+├── .claude/                       # AI-led SDLC harness (rules, agents, skills, hooks)
+├── docs/                          # documentation (architecture.html, onboarding.html, adr/)
+├── SPEC.md
+├── README.md
+├── STUDENT_GUIDE.md
+└── salone-explorer/               # ── THE APP — Vercel Root Directory ──
+    ├── index.html
+    ├── vite.config.ts
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── tsconfig.json
+    ├── package.json
+    ├── .env.example
+    ├── public/
+    │   ├── robots.txt
+    │   ├── sitemap.xml
+    │   ├── llms.txt
+    │   └── favicon.svg
+    ├── scripts/
+    │   ├── generate-sitemap.ts
+    │   └── migrate-attractions-to-supabase.ts  # Phase 2.5 (optional)
+    ├── supabase/
+    │   └── schema.sql
+    ├── tests/
+    │   └── a11y/
+    │       └── smoke.spec.ts
+    └── src/
+        ├── main.tsx                # router + HelmetProvider + AuthProvider
+        ├── App.tsx
+        ├── index.css               # imports tokens.css + tailwind
+        ├── assets/
+        │   └── brand/fambultik/
+        │       ├── logo-light.svg
+        │       ├── logo-dark.svg
+        │       └── favicon.svg
+        ├── styles/
+        │   └── tokens.css          # CSS variables (§8.4)
+        ├── data/                   # ── DATA LAYER ────────────────
+        │   ├── types.ts            # Attraction type
+        │   ├── attractions.json    # 8 records, sourced from §4
+        │   └── regions.json        # district → province lookup
+        ├── content/                # ── CONTENT LAYER ─────────────
+        │   ├── strings.en.json     # flat key→string map
+        │   └── pages/              # longer-form copy (optional)
+        │       ├── home.json
+        │       └── about.json
+        ├── lib/                    # ── CODE LAYER ────────────────
+        │   ├── supabase.ts
+        │   ├── content/
+        │   │   ├── attractions.ts          # AttractionRepository interface
+        │   │   ├── attractions.file.ts     # JSON implementation
+        │   │   ├── attractions.supabase.ts # Supabase implementation (P2.5)
+        │   │   ├── strings.ts              # t() helper
+        │   │   └── index.ts                # barrel; picks active impl
+        │   ├── bookmarks.ts
+        │   └── bookings.ts
+        ├── seo/
+        │   ├── SeoHead.tsx
+        │   ├── JsonLd.tsx
+        │   └── graph.ts
+        ├── auth/
+        │   ├── AuthProvider.tsx
+        │   └── ProtectedRoute.tsx
+        ├── components/
+        │   ├── NavBar.tsx
+        │   ├── Footer.tsx
+        │   ├── FambulTikLogo.tsx
+        │   ├── AttractionCard.tsx
+        │   ├── RatingBadge.tsx
+        │   ├── HoursBlock.tsx
+        │   ├── DirectionsButton.tsx
+        │   ├── SourcesList.tsx
+        │   ├── FaqAccordion.tsx
+        │   ├── BookmarkButton.tsx
+        │   ├── FavoriteButton.tsx
+        │   └── ScheduleTourModal.tsx
+        └── pages/
+            ├── HomePage.tsx
+            ├── AttractionDetailPage.tsx
+            ├── AboutPage.tsx
+            ├── SignInPage.tsx
+            ├── SignUpPage.tsx
+            ├── AccountPage.tsx
+            └── NotFoundPage.tsx
 ```
 
 ---
@@ -762,6 +863,22 @@ salone-explorer/
 - `public/llms.txt` per [llmstxt.org](https://llmstxt.org/) — also generated from the attractions repository.
 - Visible "Last reviewed" date echoed as `dateModified` in JSON-LD (driven by `Attraction.lastReviewed`).
 
+### 13.3 AEO (Answer Engine Optimization)
+Optimise for answer engines and assistants (Google AI Overviews,
+Perplexity, ChatGPT, Copilot, voice). Builds on GEO + JSON-LD; adds no
+new client dependency.
+- Question-shaped headings answered in the first sentence so the answer
+  is extractable without scrolling.
+- Per-attraction `speakable` JSON-LD (`SpeakableSpecification`) over the
+  definitional lead and key facts.
+- `FAQPage` answers kept self-contained (no "see above").
+- Concise, citable fact blocks (hours, location, rating) high on each
+  detail page.
+- `Review` / `aggregateRating` JSON-LD populated from Phase 9 reviews so
+  answer engines can surface ratings.
+- `public/llms.txt` (§13.2) kept current as the machine-readable entry
+  point.
+
 ---
 
 ## 14. Structured Data — JSON-LD Entity Graph
@@ -775,6 +892,9 @@ Each page emits a Schema.org `@graph`. Builders live in `src/seo/graph.ts`.
 - `WebPage`, `BreadcrumbList` per route.
 - `TouristAttraction` per attraction — `address`, `geo`, `aggregateRating`, `openingHoursSpecification`, `image`, `video`, `containedInPlace` → `TouristDestination` "Sierra Leone".
 - `FAQPage` per attraction with `faqs[]`.
+- `Review` per published review (Phase 9), aggregated into the
+  attraction's `aggregateRating`.
+- `SpeakableSpecification` on the attraction lead + key facts (AEO, §13.3).
 
 ### 14.2 Validation
 - [Schema.org Validator](https://validator.schema.org/) + [Rich Results Test](https://search.google.com/test/rich-results) report zero errors on detail pages.
@@ -800,20 +920,41 @@ Four workflows; merges to `main` require all four green.
 - Supabase RLS on every user-scoped table.
 - `target="_blank" rel="noopener noreferrer"` on outbound links.
 - Security headers via `vercel.json` (`X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`).
+- **(P6)** OAuth redirect URLs allow-listed in Supabase; no open redirect.
+- **(P9)** Review bodies sanitised and length-bounded (§6.6 check);
+  rate-limited; `status` gates public display (moderation).
+- **(P10, P11)** Email-provider and Stripe secret keys live only as
+  Supabase Edge Function secrets — never `VITE_`-exposed.
+- **(P11)** Stripe webhooks verified by signature before any DB write;
+  payment status written only by the Edge Function (service role).
 
 ---
 
 ## 16. Environment Variables
 
 ```env
-VITE_SITE_URL=https://ai-led-sdlc-demo.vercel.app
+# Canonical site URL — production custom domain. Drives canonical URLs,
+# sitemap.xml, OG/Twitter tags, and llms.txt. Vercel preview deploys use
+# their generated *.vercel.app URL.
+VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com
 
 # Data source toggle: "file" (Phase 1 default) or "supabase" (Phase 2.5)
 VITE_ATTRACTIONS_SOURCE=file
 
-# Phase 2
+# Phase 2 — Supabase project: slint-ai-led-sdlc-demo
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+
+# Phase 6 social login: OAuth client IDs/secrets for Google, Facebook,
+# and LinkedIn are configured in the Supabase dashboard, NOT as VITE_ vars.
+
+# Phase 11 (Stripe) — client publishable key only:
+VITE_STRIPE_PUBLISHABLE_KEY=
+
+# Server-side secrets live as Supabase Edge Function secrets, NOT VITE_,
+# so they never reach the browser bundle:
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET   (Phase 11)
+#   EMAIL_PROVIDER_API_KEY                      (Phase 10)
 ```
 
 If using the Vercel ↔ Supabase integration, rename `NEXT_PUBLIC_*` → `VITE_*`.
@@ -824,16 +965,25 @@ If using the Vercel ↔ Supabase integration, rename `NEXT_PUBLIC_*` → `VITE_*
 
 **Publisher:** TpGroup (SL) Limited.
 **Brand:** FambulTik.
-**Repository:** `git@github.com:click2tman/ai-led-sdlc-demo.git`.
+**Repository:** `git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git`.
 
 **Disclaimer (render verbatim via `t("disclaimer.full")` in footer, `/about`, and the Home alert):**
 > *Salone Explorer is built by TpGroup (SL) Limited under the FambulTik brand for demonstration and educational purposes only. It is not an official tourism service and does not represent any government body. Attraction details, opening hours, and ratings are curated from public sources and may be inaccurate or out of date. Always verify directly with the operator before travelling. No payments or real bookings are processed by this application.*
+
+**Phase 11 caveat:** the final sentence holds for the in-class build
+(Phases 1–7), which processes no payments. Before enabling live Stripe
+payments in Phase 11, this disclaimer must be revised to reflect that
+real payments are processed, with the corresponding terms and refund
+policy.
 
 ---
 
 ## 18. Build & Run
 
+All app commands run from the `salone-explorer/` subdirectory (§12).
+
 ```bash
+cd salone-explorer
 npm install
 npm run dev
 npm run build
@@ -851,12 +1001,12 @@ Node 20+ required.
 ## 19. Delivery Workflow
 
 ### Phase 1 — Scaffold (≈ 8 min)
-1. `npm create vite@latest salone-explorer -- --template react-ts`
+1. From the repo root, `npm create vite@latest salone-explorer -- --template react-ts`. This creates the `salone-explorer/` app subdirectory (§12), kept separate from the `.claude/` harness and `docs/`. Run steps 2–5 inside it (`cd salone-explorer`).
 2. `npm install` and runtime deps: `react-router-dom react-helmet-async @radix-ui/react-dialog @radix-ui/react-accordion @radix-ui/react-toast lucide-react class-variance-authority`
 3. Dev deps: `tailwindcss postcss autoprefixer eslint eslint-plugin-jsx-a11y vite-plugin-prerender @axe-core/playwright @playwright/test wait-on`
 4. `npx tailwindcss init -p`; wire FambulTik tokens.
 5. Drop FambulTik logos into `src/assets/brand/fambultik/`. Set `<html lang="en">` in `index.html`.
-6. Initialise git; commit; push to `git@github.com:click2tman/ai-led-sdlc-demo.git` on `main`.
+6. Initialise git; commit; push to `git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git` on `main`.
 
 ### Phase 2 — Data, content, repository (≈ 8 min)
 7. Create `src/data/types.ts` with the `Attraction` type.
@@ -865,31 +1015,31 @@ Node 20+ required.
 10. Create `src/content/strings.en.json` (all UI strings, no English literals in any component).
 11. Create the repository abstraction in `src/lib/content/` per §5.2.3.
 
-### Phase 3 — SEO, JSON-LD, brand, UI, accessibility (≈ 22 min)
+### Phase 3 — SEO, AEO, GEO, JSON-LD, brand, UI, accessibility (≈ 22 min)
 12. Wire `BrowserRouter` + `HelmetProvider` in `main.tsx`.
 13. Implement DS-aligned components and pages (Home, Detail, About, NotFound). Components use `t()` for every string and the repository for every datum.
-14. Add `src/seo/graph.ts`, `JsonLd.tsx`, `SeoHead.tsx`.
+14. Add `src/seo/graph.ts`, `JsonLd.tsx`, `SeoHead.tsx`. Include AEO (§13.3): `SpeakableSpecification` JSON-LD plus question-shaped headings with extractable lead answers, self-contained FAQ answers, and citable fact blocks.
 15. Add `public/robots.txt`, `public/llms.txt`, `vercel.json`.
 16. Add `scripts/generate-sitemap.ts`; wire to `npm run build`.
 17. Verify keyboard navigation + 320 / 375 / 768 / 1024 / 1440 px.
 
 ### Phase 4 — CI + Deploy v1 (≈ 7 min)
-18. Add `.github/workflows/*` and `dependabot.yml`.
-19. Add `tests/a11y/smoke.spec.ts`.
+18. Add `.github/workflows/*` and `dependabot.yml` **at the repository root** (`.github/` cannot live in a subfolder). Each job sets `defaults.run.working-directory: salone-explorer` so lint/typecheck/build/test run in the app dir; Dependabot points at `salone-explorer/package.json`.
+19. Add `salone-explorer/tests/a11y/smoke.spec.ts`.
 20. Update README; commit; push.
-21. Connect repo to Vercel (Vite preset, `dist`); set `VITE_SITE_URL` and `VITE_ATTRACTIONS_SOURCE=file`; deploy.
+21. In the **existing** Vercel project `slint-ai-led-sdlc-s-projects/ai-led-sdlc-demo` (do not create a new one), set **Root Directory = `salone-explorer`** (this is what excludes `.claude/` and `docs/` from the build), Framework Preset = Vite, Output = `dist`; set `VITE_SITE_URL=https://slint-ai-led-sdlc.tpgroupsl.com` and `VITE_ATTRACTIONS_SOURCE=file`; map the `slint-ai-led-sdlc.tpgroupsl.com` domain; deploy.
 22. Validate live URL with Schema.org Validator + Lighthouse.
 
 ### Phase 5 — Supabase provisioning (≈ 10 min)
 23. Provision Supabase (Vercel integration or manual).
 24. Run §6.3 schema.
-25. Enable Email auth; disable Confirm-email.
+25. Enable Email auth (disable Confirm-email) and the Google, Facebook, and LinkedIn OAuth providers (client IDs/secrets in the Supabase dashboard; redirect URLs allow-listed).
 26. `npm install @supabase/supabase-js`; add `src/lib/supabase.ts`.
 27. Set `VITE_SUPABASE_*`.
 
 ### Phase 6 — Auth + account (≈ 30 min)
 28. `AuthProvider`, `ProtectedRoute`.
-29. `SignInPage`, `SignUpPage`, `BookmarkButton`, `FavoriteButton`, `ScheduleTourModal`, `AccountPage`.
+29. `SignInPage`, `SignUpPage`, `SocialSignInButtons` (Google/Facebook/LinkedIn via `signInWithOAuth`), `BookmarkButton`, `FavoriteButton`, `ScheduleTourModal`, `AccountPage`.
 30. Update `NavBar`.
 
 ### Phase 7 — Ship v2 (≈ 10 min)
@@ -905,6 +1055,24 @@ Node 20+ required.
 
 ### Phase 8 — Future: Payload CMS (out of scope)
 Documented in §5.4 as the architectural endpoint.
+
+### Phase 9 — Real-time reviews (post-class)
+38. Apply the §6.6 `reviews` table + RLS in one migration.
+39. `ReviewList` (Supabase Realtime subscription) + auth-gated `ReviewForm` on the detail page; strings via `t("reviews.*")`.
+40. Feed `aggregateRating` + `Review` JSON-LD (§14) from published reviews.
+41. Moderation path: `status` gating, flag/remove; review bodies sanitised and rate-limited.
+
+### Phase 10 — Email notifications (post-class)
+42. Scaffold Supabase Edge Functions; set `EMAIL_PROVIDER_API_KEY` as a function secret.
+43. Send transactional email on booking create/cancel (and optionally new review); copy sourced from the content layer.
+44. No secret in the client; no PII beyond what the message needs.
+
+### Phase 11 — Payments / Stripe (post-class)
+45. Apply the §6.6 `payments` table + RLS.
+46. Edge Function creates the PaymentIntent / Checkout Session (holds `STRIPE_SECRET_KEY`).
+47. Client opens Stripe Checkout/Elements with `VITE_STRIPE_PUBLISHABLE_KEY` from the Schedule-a-Tour dialog.
+48. Edge Function webhook verifies the signature (`STRIPE_WEBHOOK_SECRET`), then marks `payments` + `tour_bookings` paid (service role).
+49. Revise the §17 disclaimer before enabling live mode.
 
 ---
 
@@ -939,6 +1107,22 @@ Documented in §5.4 as the architectural endpoint.
 - [ ] No component diff between file and supabase modes.
 - [ ] `public.attractions` RLS allows public read; no write policy.
 
+### Phase 6 — social login
+- [ ] Google, Facebook, and LinkedIn sign-in each complete and create a `profiles` row.
+- [ ] No provider secret appears in the client bundle.
+
+### Phase 9 — reviews
+- [ ] An authenticated user can post one review per attraction; the list updates live.
+- [ ] Only published reviews are publicly visible; RLS verified across two accounts.
+- [ ] `aggregateRating` reflects published reviews in JSON-LD.
+
+### Phase 10 — email
+- [ ] Booking create/cancel triggers an email; the provider key exists only as an Edge Function secret.
+
+### Phase 11 — payments
+- [ ] Deposit checkout succeeds in Stripe test mode; the booking is marked paid only via a verified webhook.
+- [ ] No Stripe secret in the client bundle; §17 disclaimer revised before live mode.
+
 ---
 
 ## 21. Roadmap
@@ -959,7 +1143,9 @@ Documented in §5.4 as the architectural endpoint.
 - **Do not** hard-code any attraction fact, opening hour, rating, or coordinate in a component, page, or library file. All facts live in `src/data/`.
 - **Do not** import `attractions.json` directly from a component or page. Components consume the `attractions` repository from `src/lib/content`.
 - **Do not** invent attraction facts. Pull from §4 sources; when uncertain, set `hours.notes: "Hours vary — confirm locally"`.
-- **Do not** introduce a payment gateway or external booking API.
+- **Do not** introduce a payment gateway or external booking API in Phases 1–8. Payments (Stripe) arrive only in Phase 11, server-side in Edge Functions; the in-class build (Phases 1–7) processes no payments.
+- **Do not** place any Stripe or email-provider secret in client code or a `VITE_` var; they are Supabase Edge Function secrets (§16).
+- **Do not** write `payments` status from the client; only the Edge Function does, from a signature-verified Stripe webhook.
 - **Do not** add libraries beyond §3 unless strictly necessary; justify in a code comment.
 - **Do not** store secrets in client code.
 - **Do not** ship without the disclaimer alert, footer disclaimer, and `/about` disclaimer.

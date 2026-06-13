@@ -1,0 +1,14 @@
+# Dependabot: weekly npm + GitHub Actions updates (SPEC §15). The app manifest
+# lives in salone-explorer/ (SPEC §12).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /salone-explorer
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

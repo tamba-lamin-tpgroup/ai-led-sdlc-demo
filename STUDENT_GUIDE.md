@@ -3,7 +3,7 @@
 > **Course:** AI-Led Software Development Lifecycle (SDLC) Demo
 > **Instructor:** Tamba Slamin · TpGroup (SL) Limited
 > **Brand:** FambulTik (TpGroup heritage-and-diaspora subsidiary)
-> **Reference repo:** `git@github.com:click2tman/ai-led-sdlc-demo.git`
+> **Reference repo:** `git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git`
 > **Design system:** [design.tpgroupsl.com](https://design.tpgroupsl.com/)
 > **Deliverable:** A live, WCAG 2.2 AA, mobile-responsive, FambulTik-branded Sierra Leone tour-guide web app — with code, data, and content cleanly separated — built using Claude Code.
 
@@ -109,7 +109,7 @@ I will use supabase on Vercel for database.
 ### Prompt 4 — Productionise: branding, compliance, SEO/GEO, security
 
 ```text
-Git repo for the work is git@github.com:click2tman/ai-led-sdlc-demo.git
+Git repo for the work is git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git
 - Company creating the app is TpGroup (SL) Limited. Add a disclaimer
 that this app is for demo purposes only. Make sure the app is mobile
 ready and responsive. Make sure the app is built with SEO and GEO in
@@ -257,14 +257,14 @@ A good agent should warn you when you've over-scoped — accept the warning.
    in components, no attraction facts outside src/data/attractions.json. Mirror
    the TpGroup Design System (§8) and conform to WCAG 2.2 Level AA (§10).
    Commit after each phase. The git remote is
-   git@github.com:click2tman/ai-led-sdlc-demo.git — push to that. Stop and ask
+   git@github.com:tamba-lamin-tpgroup/ai-led-sdlc-demo.git — push to that. Stop and ask
    before deviating from §5 (architecture), §6.1 (type), §8 (brand), §10
    (a11y), or §12 (structure). Begin.
    ```
 
 4. **Watch.** When Claude asks for clarification, answer briefly. When it commits, glance at the diff.
-5. **Spot-check the separation early.** After the first UI commit, run `grep -rn '"Sign in"\|"Home"\|"Schedule a Tour"' src/components src/pages src/lib`. If anything matches, push back: "Move those literals to `src/content/strings.en.json`."
-6. **Around minute 35**, open Vercel, import the GitHub repo, set Framework Preset = Vite, click Deploy.
+5. **Spot-check the separation early.** After the first UI commit, run (from the app dir) `cd salone-explorer && grep -rn '"Sign in"\|"Home"\|"Schedule a Tour"' src/components src/pages src/lib`. If anything matches, push back: "Move those literals to `src/content/strings.en.json`."
+6. **Around minute 35**, open Vercel, import the GitHub repo, set Framework Preset = Vite, **Root Directory = `salone-explorer`**, click Deploy.
 7. **At minute 42**, open the live URL on your phone. Verify the FambulTik logo, the disclaimer, the responsive grid, keyboard focus rings, and Get Directions.
 
 ### In class — Phase 2 (if time permits)
@@ -299,7 +299,7 @@ A good agent should warn you when you've over-scoped — accept the warning.
 - Re-enable "Confirm email" in Supabase for production.
 - Run Lighthouse on the live URL.
 - One full keyboard-only walkthrough and one screen-reader pass (VoiceOver or NVDA).
-- Verify the separation: `grep -rn '"[A-Z][a-z]' src/components src/pages | wc -l` — should return zero matches for user-facing strings.
+- Verify the separation (from `salone-explorer/`): `grep -rn '"[A-Z][a-z]' src/components src/pages | wc -l` — should return zero matches for user-facing strings.
 
 ---
 

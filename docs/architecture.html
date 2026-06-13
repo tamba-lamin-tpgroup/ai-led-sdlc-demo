@@ -1,0 +1,999 @@
+<!doctype html>
+<!--
+  architecture.html - Browser-viewable architecture reference for Salone
+  Explorer (FambulTik / TpGroup (SL) Limited). Six architecture views
+  (business, development, infrastructure, platform, application, runtime)
+  plus the AI-led SDLC harness, testing approach, security posture, ADRs,
+  and binding principles. Every section traces back to SPEC.md.
+
+  Self-contained except one external dependency: Mermaid is loaded from the
+  jsDelivr CDN to render the flow, sequence, and graph diagrams (needs
+  network on first load).
+
+  Authoritative sources this mirrors (read those when they disagree):
+    - SPEC.md                          single source of truth
+    - CLAUDE.md                        project operating rules
+    - .claude/rules/*.md               binding, loaded every session
+    - docs/dev-guide/claude-harness.md the concise harness reference
+    - docs/onboarding.html             sibling: the AI-led SDLC onboarding
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Salone Explorer - Architecture Reference</title>
+<style>
+  :root {
+    --bg: #0f1417;
+    --panel: #161d22;
+    --panel-2: #1c252b;
+    --ink: #e7edf0;
+    --muted: #9fb0b8;
+    --line: #2a363d;
+    --green: #1f9d57;
+    --green-soft: #163d2a;
+    --amber: #d9a23a;
+    --amber-soft: #3d3216;
+    --red: #d9534f;
+    --red-soft: #3d1c1b;
+    --blue: #4a90d9;
+    --blue-soft: #16293d;
+    --accent: #1f9d57;
+    --radius: 10px;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6; font-size: 16px;
+  }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre, .mono { font-family: var(--mono); }
+  code {
+    background: var(--panel-2); padding: 0.1em 0.4em; border-radius: 5px;
+    font-size: 0.86em; border: 1px solid var(--line); color: #d7e7dd;
+  }
+  pre {
+    background: #0b0f12; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px; overflow-x: auto; font-size: 0.85em; line-height: 1.5;
+  }
+  pre code { background: none; border: none; padding: 0; color: #cfe3d7; }
+
+  /* Layout */
+  .wrap { display: grid; grid-template-columns: 290px 1fr; min-height: 100vh; }
+  nav.side {
+    position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--line); padding: 22px 16px;
+  }
+  nav.side .brand { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.2px; }
+  nav.side .brand small { display: block; color: var(--muted); font-weight: 400; font-size: 0.72rem; margin-top: 3px; }
+  nav.side ol { list-style: none; margin: 18px 0 0; padding: 0; counter-reset: s; }
+  nav.side ol li { margin: 0; }
+  nav.side ol > li > a {
+    display: block; padding: 7px 10px; border-radius: 7px; color: var(--muted);
+    font-size: 0.9rem; counter-increment: s;
+  }
+  nav.side ol > li > a::before { content: counter(s) ". "; color: var(--accent); font-variant-numeric: tabular-nums; }
+  nav.side ol > li > a:hover { background: var(--panel-2); color: var(--ink); text-decoration: none; }
+  nav.side ol > li > a.active { background: var(--green-soft); color: #d7f0e1; }
+  nav.side .foot { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--muted); }
+  nav.side .foot a { color: var(--muted); }
+
+  main { padding: 0 48px 120px; max-width: 1040px; }
+  header.hero {
+    padding: 64px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+  }
+  header.hero .kicker {
+    text-transform: uppercase; letter-spacing: 2px; font-size: 0.72rem; color: var(--accent); font-weight: 700;
+  }
+  header.hero h1 { font-size: 2.4rem; margin: 10px 0 6px; line-height: 1.15; }
+  header.hero p.lead { font-size: 1.12rem; color: var(--muted); max-width: 72ch; margin: 0; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+
+  section { padding: 40px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 20px; }
+  section > h2 { font-size: 1.6rem; margin: 0 0 6px; }
+  section > .sub { color: var(--muted); margin: 0 0 14px; max-width: 78ch; }
+  h3 { font-size: 1.18rem; margin: 30px 0 8px; }
+  h4 { font-size: 1.0rem; margin: 22px 0 6px; color: #cfe0d8; }
+  p { max-width: 80ch; }
+
+  /* SPEC source line */
+  .src {
+    display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    font-size: 0.74rem; color: var(--muted); margin: 0 0 18px;
+    padding: 5px 10px; background: var(--panel); border: 1px solid var(--line);
+    border-left: 3px solid var(--blue); border-radius: 6px;
+  }
+  .src b { color: #88bdf0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 100px; font-size: 0.72rem;
+    font-weight: 600; border: 1px solid var(--line); background: var(--panel-2); color: var(--muted);
+    white-space: nowrap;
+  }
+  .badge.green { background: var(--green-soft); color: #74d7a0; border-color: #225f3e; }
+  .badge.amber { background: var(--amber-soft); color: #e8c272; border-color: #6a571f; }
+  .badge.red { background: var(--red-soft); color: #e89490; border-color: #6a2c2a; }
+  .badge.blue { background: var(--blue-soft); color: #88bdf0; border-color: #2c4f72; }
+
+  /* Cards */
+  .grid { display: grid; gap: 14px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .card h4 { margin-top: 0; }
+  .card p { margin: 6px 0 0; font-size: 0.92rem; color: var(--muted); }
+  .card.accent { border-left: 3px solid var(--accent); }
+
+  /* Callouts */
+  .callout {
+    border-radius: var(--radius); padding: 14px 18px; margin: 18px 0;
+    border: 1px solid var(--line); background: var(--panel);
+  }
+  .callout .tag { font-weight: 700; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 1px; }
+  .callout.why { border-left: 3px solid var(--blue); }
+  .callout.why .tag { color: var(--blue); }
+  .callout.warn { border-left: 3px solid var(--amber); }
+  .callout.warn .tag { color: var(--amber); }
+  .callout.key { border-left: 3px solid var(--green); }
+  .callout.key .tag { color: var(--accent); }
+  .callout p { margin: 6px 0 0; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: #cfe0d8; font-weight: 600; background: var(--panel); border-bottom: 1px solid var(--line); }
+  tr:hover td { background: rgba(31,157,87,0.05); }
+  td code { white-space: nowrap; }
+
+  /* Diagram panel (wraps Mermaid + CSS block diagrams) */
+  .diagram {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; margin: 18px 0; overflow-x: auto;
+  }
+  .diagram .cap { font-size: 0.78rem; color: var(--muted); margin: 0 0 10px; }
+  .mermaid { text-align: center; }
+
+  /* Layered block diagram (CSS, on-brand) */
+  .layers { display: flex; flex-direction: column; gap: 10px; }
+  .layer { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; background: var(--panel-2); }
+  .layer .lt { font-weight: 700; font-size: 0.92rem; }
+  .layer .lp { font-size: 0.8rem; color: var(--muted); margin-top: 3px; }
+  .layer.code { border-left: 3px solid var(--blue); }
+  .layer.data { border-left: 3px solid var(--amber); }
+  .layer.content { border-left: 3px solid var(--green); }
+  .layer .tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* Pipeline diagram */
+  .pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 20px 0; }
+  .pipe .step {
+    flex: 1 1 140px; background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 14px; position: relative; min-width: 140px;
+  }
+  .pipe .step .n { font-size: 0.7rem; color: var(--accent); font-weight: 700; }
+  .pipe .step .t { font-weight: 600; font-size: 0.92rem; margin-top: 2px; }
+  .pipe .step .d { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .pipe .arrow { align-self: center; color: var(--line); padding: 0 6px; font-size: 1.2rem; }
+
+  ul.tight { margin: 8px 0; padding-left: 20px; }
+  ul.tight li { margin: 4px 0; max-width: 80ch; }
+
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
+  .kpi .k { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; text-align: center; }
+  .kpi .k .big { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .kpi .k .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+  /* ADR cards */
+  .adr { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); padding: 16px 18px; margin: 12px 0; border-left: 3px solid var(--accent); }
+  .adr .id { font-size: 0.72rem; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+  .adr h4 { margin: 4px 0 8px; }
+  .adr .row { font-size: 0.9rem; margin: 4px 0; }
+  .adr .row b { color: #cfe0d8; }
+
+  footer { color: var(--muted); font-size: 0.82rem; padding: 30px 0 0; }
+
+  @media (max-width: 920px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav.side { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    main { padding: 0 20px 80px; }
+    .grid.cols-2, .grid.cols-3, .grid.cols-4, .kpi { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="side">
+  <div class="brand">Salone Explorer
+    <small>Architecture Reference &middot; FambulTik / TpGroup (SL)</small>
+  </div>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#business">Business architecture</a></li>
+    <li><a href="#development">Development architecture</a></li>
+    <li><a href="#platform">Platform architecture</a></li>
+    <li><a href="#application">Application architecture</a></li>
+    <li><a href="#infrastructure">Infrastructure architecture</a></li>
+    <li><a href="#runtime">Runtime architecture</a></li>
+    <li><a href="#ai-sdlc">AI-led SDLC tooling</a></li>
+    <li><a href="#testing">Testing approach</a></li>
+    <li><a href="#security">Security architecture</a></li>
+    <li><a href="#adr">Decision records</a></li>
+    <li><a href="#principles">Principles</a></li>
+  </ol>
+  <div class="foot">
+    Single source of truth: <a href="../SPEC.md">SPEC.md</a><br/>
+    Sibling: <a href="onboarding.html">onboarding.html</a>
+  </div>
+</nav>
+
+<main>
+  <header class="hero" id="overview">
+    <div class="kicker">Architecture Reference</div>
+    <h1>How Salone Explorer is built</h1>
+    <p class="lead">Salone Explorer is a Sierra Leone tour-guide single-page application published by
+    TpGroup (SL) Limited under the FambulTik brand. This document describes its architecture across six
+    views - business, development, platform, application, infrastructure, and runtime - plus the AI-led
+    SDLC harness that produces it, the testing approach, and the security posture. Every claim traces
+    back to <a href="../SPEC.md">SPEC.md</a>, the single source of truth.</p>
+    <div class="hero-meta">
+      <span class="badge green">Vite + React + TypeScript</span>
+      <span class="badge green">Supabase + Tailwind</span>
+      <span class="badge green">Deploy: Vercel</span>
+      <span class="badge blue">Harness: .claude/</span>
+      <span class="badge amber">WCAG 2.2 AA</span>
+      <span class="badge amber">Source of truth: SPEC.md</span>
+    </div>
+  </header>
+
+  <!-- ================= OVERVIEW ================= -->
+  <section id="overview-body">
+    <h2>The shape of the system</h2>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;1, &sect;2, &sect;5, &sect;17</p>
+    <p>Salone Explorer ships in two halves. <strong>Phase 1</strong> is a fully static, public-facing
+    site - a curated catalogue of Sierra Leone attractions rendered from local JSON, SEO/AEO/GEO
+    optimised, structured-data-rich, and deployed to Vercel. <strong>Phase 2</strong> adds a Supabase
+    backend for authentication, bookmarks, favorites, account view, and tour scheduling. Three
+    post-class phases (9-11) extend it toward a transactional product: real-time reviews, transactional
+    email, and Stripe deposits. A future Phase 8 swaps the file-backed content for Payload CMS.</p>
+
+    <p>The architecture is organised around one keystone idea: a <strong>strict separation of code,
+    data, and content</strong>, with all data access funnelled through a repository abstraction. That
+    single decision is what lets the backing store move from JSON to Postgres to a CMS without
+    rewriting the UI. Everything else in this document hangs off it.</p>
+
+    <div class="kpi">
+      <div class="k"><div class="big">3</div><div class="lbl">Layers: code / data / content</div></div>
+      <div class="k"><div class="big">6</div><div class="lbl">Architecture views documented</div></div>
+      <div class="k"><div class="big">4</div><div class="lbl">CI gates required to ship</div></div>
+      <div class="k"><div class="big">AA</div><div class="lbl">WCAG 2.2 conformance target</div></div>
+    </div>
+
+    <div class="callout warn">
+      <span class="tag">Disclaimer</span>
+      <p>Salone Explorer is built for demonstration and educational purposes only. It is not an official
+      tourism service. Attraction details are curated from public sources and may be out of date. No
+      payments or real bookings are processed in the in-class build (Phases 1-7). Enabling Stripe
+      (Phase 11) requires revising the &sect;17 disclaimer. Rendered verbatim in the footer, on
+      <code>/about</code>, and in the Home alert.</p>
+    </div>
+  </section>
+
+  <!-- ================= BUSINESS ================= -->
+  <section id="business">
+    <h2>1. Business architecture</h2>
+    <p class="sub">Who it serves, what it is worth to them, and the scope boundaries that keep the
+    teaching demo honest.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;1, &sect;2, &sect;4, &sect;8, &sect;17, &sect;21</p>
+
+    <h3>Stakeholders and value</h3>
+    <div class="grid cols-3">
+      <div class="card accent"><h4>Diaspora visitors</h4><p>Sierra Leoneans abroad reconnecting with
+      home. Browse attractions, save favorites, schedule tours. The FambulTik mission audience.</p></div>
+      <div class="card accent"><h4>Domestic visitors</h4><p>In-country travellers planning trips with
+      directions, hours, and practical detail sourced from official tourism bodies.</p></div>
+      <div class="card accent"><h4>Generative-AI assistants</h4><p>LLMs surfacing Sierra Leone tourism
+      answers. Served via GEO/AEO content patterns, JSON-LD, and <code>llms.txt</code>.</p></div>
+    </div>
+
+    <div class="diagram">
+      <p class="cap">Stakeholder and value map (publisher to audiences).</p>
+      <pre class="mermaid">
+flowchart LR
+  TP["TpGroup (SL) Limited<br/>publisher"] --> FB["FambulTik brand<br/>heritage &amp; diaspora"]
+  FB --> SE["Salone Explorer<br/>tour-guide SPA"]
+  SE --> A1["Diaspora visitors"]
+  SE --> A2["Domestic visitors"]
+  SE --> A3["AI assistants"]
+  SRC[("Official sources<br/>NTB, TSL, VSL, Heritage")] -. curated facts .-> SE
+  SE -- "browse, save, schedule" --> VAL["Reconnection,<br/>trip planning,<br/>discoverability"]
+      </pre>
+    </div>
+
+    <h3>Scope by phase</h3>
+    <table>
+      <tr><th>Phase</th><th>Class scope</th><th>Capability</th></tr>
+      <tr><td><span class="badge green">1</span></td><td>In-class</td><td>Static foundation: Home + Detail, JSON-backed, SEO/AEO/GEO, branded, WCAG AA, deployed.</td></tr>
+      <tr><td><span class="badge green">2-7</span></td><td>In-class</td><td>Supabase auth (email + Google/Facebook/LinkedIn), bookmarks, favorites, tour scheduling, My Account.</td></tr>
+      <tr><td><span class="badge amber">2.5</span></td><td>Optional</td><td>Migrate attractions JSON to a Supabase table - demonstrates the repository swap.</td></tr>
+      <tr><td><span class="badge blue">9-11</span></td><td>Post-class</td><td>Real-time reviews, transactional email, Stripe deposits. Carry server compute, secrets, moderation, legal weight.</td></tr>
+      <tr><td><span class="badge red">8</span></td><td>Future</td><td>Payload CMS replaces file-based content. App becomes pure presentation.</td></tr>
+    </table>
+
+    <h3>Sourcing and legal posture</h3>
+    <p>All attraction facts derive from five authoritative sources (the National Tourist Board, Sierra
+    Leone Tourism, Visit Sierra Leone, Sierra Leone Heritage, and sierra-leone.org). Facts are
+    paraphrased, never copied; every record cites at least one source URL; unconfirmed hours fall back
+    to <code>"Hours vary - confirm locally"</code>. The disclaimer is non-negotiable and ships in three
+    places. These are business constraints encoded as engineering guardrails (&sect;4, &sect;17, &sect;22).</p>
+  </section>
+
+  <!-- ================= DEVELOPMENT ================= -->
+  <section id="development">
+    <h2>2. Development architecture</h2>
+    <p class="sub">The keystone: three layers, one repository abstraction, and the structure that keeps
+    them apart.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;5, &sect;6.1, &sect;12 &middot; rules <code>three-layer-separation</code>, <code>api-conventions</code></p>
+
+    <h3>The three layers</h3>
+    <p>Every file belongs to exactly one layer. The layer dictates where it lives. No component, page,
+    or library file may contain a user-facing string, an attraction fact, or a data fixture.</p>
+
+    <div class="diagram">
+      <p class="cap">Code, data, and content are physically separated; only the code layer reads the
+      other two, and only through indirection.</p>
+      <div class="layers">
+        <div class="layer code">
+          <div class="lt">Code layer</div>
+          <div class="lp"><code>src/components/</code> &middot; <code>src/pages/</code> &middot; <code>src/lib/</code> - React components, routes, business logic. No strings. No facts.</div>
+          <div class="tags"><span class="badge blue">reads facts via repository</span><span class="badge blue">reads copy via t()</span></div>
+        </div>
+        <div class="layer data">
+          <div class="lt">Data layer</div>
+          <div class="lp"><code>src/data/*.json</code> - attractions, regions, taxonomies. Eventual home: Supabase table (P2.5) or Payload collection (P8).</div>
+          <div class="tags"><span class="badge amber">attractions.json</span><span class="badge amber">regions.json</span><span class="badge amber">types.ts</span></div>
+        </div>
+        <div class="layer content">
+          <div class="lt">Content layer</div>
+          <div class="lp"><code>src/content/*.json</code> - all UI strings, page copy, microcopy, the disclaimer. Eventual home: Payload globals (P8).</div>
+          <div class="tags"><span class="badge green">strings.en.json</span><span class="badge green">flat key -&gt; string</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout key">
+      <span class="tag">The hard rule</span>
+      <p>If you are about to type <code>"Schedule a Tour"</code> or <code>"Tiwai Island"</code> inside a
+      <code>.tsx</code> file - stop. The string goes in <code>strings.en.json</code> and is read via
+      <code>t("namespace.key")</code>. The fact goes in <code>attractions.json</code> and is read
+      through the <code>attractions</code> repository. A grep for English strings or attraction names
+      under <code>src/components</code>, <code>src/pages</code>, or <code>src/lib</code> (excluding
+      <code>src/lib/content</code>) must return zero matches.</p>
+    </div>
+
+    <h3>The repository pattern</h3>
+    <p>Components consume <code>attractions</code> from the barrel <code>src/lib/content/index.ts</code>.
+    The barrel selects an implementation from <code>VITE_ATTRACTIONS_SOURCE</code>. The UI never knows
+    which backend serves the data - this is the entire point of the architecture and the bridge to
+    Phase 8.</p>
+
+    <div class="diagram">
+      <p class="cap">One interface, swappable implementations, chosen by environment variable.</p>
+      <pre class="mermaid">
+flowchart TD
+  UI["Pages &amp; components<br/>import { attractions }"] --> BARREL["src/lib/content/index.ts<br/>barrel selector"]
+  ENV{{"VITE_ATTRACTIONS_SOURCE"}} --> BARREL
+  BARREL -->|"file (P1 default)"| FILE["fileAttractionRepository<br/>reads attractions.json"]
+  BARREL -->|"supabase (P2.5)"| SUPA["supabaseAttractionRepository<br/>reads Postgres"]
+  BARREL -.->|"payload (P8, future)"| PAY["payloadAttractionRepository<br/>reads Payload CMS"]
+  FILE --> IFACE["AttractionRepository<br/>getAll() / getById()"]
+  SUPA --> IFACE
+  PAY -.-> IFACE
+      </pre>
+    </div>
+
+    <pre><code>// src/lib/content/attractions.ts - the contract
+export interface AttractionRepository {
+  getAll(): Promise&lt;Attraction[]&gt;;
+  getById(id: string): Promise&lt;Attraction | null&gt;;
+}
+
+// src/lib/content/index.ts - the selector
+const source = import.meta.env.VITE_ATTRACTIONS_SOURCE ?? "file";
+export const attractions =
+  source === "supabase" ? supabaseAttractionRepository : fileAttractionRepository;</code></pre>
+
+    <h3>Strings indirection</h3>
+    <p><code>src/lib/content/strings.ts</code> exports <code>t(key)</code>. All copy flows through it.
+    Strings never contain HTML - rich text is composed in components from multiple keys. Adding a new
+    key is a documented PR step. A second locale file (<code>strings.kri.json</code> for Krio) is the
+    i18n on-ramp.</p>
+
+    <h3>Project structure</h3>
+    <p>The shippable app and the AI-led SDLC tooling live in <strong>separate trees</strong>. The
+    repository root holds the spec, docs, CI config, and the <code>.claude/</code> harness; the
+    application is scaffolded into a <code>salone-explorer/</code> subdirectory. Vercel's Root Directory
+    is set to <code>salone-explorer</code>, so the deployment is built only from that folder and never
+    contains the harness or docs (see ADR-09). Within the app, the directory tree encodes the layer
+    boundaries (&sect;12).</p>
+    <pre><code>ai-led-sdlc-demo/          # repo root - NOT deployed
+  .github/workflows/        # CI; jobs run working-directory: salone-explorer
+  .claude/                  # AI-led SDLC harness
+  docs/                     # documentation + adr/
+  SPEC.md  README.md
+  salone-explorer/          # THE APP - Vercel Root Directory
+    package.json  vite.config.ts  tsconfig.json
+    src/
+      data/      DATA LAYER     types.ts, attractions.json, regions.json
+      content/   CONTENT LAYER  strings.en.json, pages/
+      lib/       CODE LAYER     content/ (repos + t()), supabase.ts
+      seo/                      SeoHead.tsx, JsonLd.tsx, graph.ts
+      auth/                     AuthProvider.tsx, ProtectedRoute.tsx
+      components/               NavBar, Footer, AttractionCard, ...
+      pages/                    HomePage, AttractionDetailPage, ...</code></pre>
+
+    <h3>Branching and commits</h3>
+    <p>Two long-lived branches: <code>dev</code> (integration trunk) and <code>main</code> (production,
+    deployed to Vercel). Promotion is one-directional, <code>dev -&gt; main</code>, gated on four green
+    CI workflows plus one human approval. Feature branches are <code>issue-&lt;num&gt;-&lt;slug&gt;</code>,
+    cut from <code>dev</code>. Every commit carries a traceability trailer
+    (<code>Requirement:</code> / <code>Phase:</code> / <code>Incident:</code>), enforced by a hook.</p>
+  </section>
+
+  <!-- ================= PLATFORM ================= -->
+  <section id="platform">
+    <h2>3. Platform architecture</h2>
+    <p class="sub">The technology choices and the design-token foundation every visual derives from.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;3, &sect;8</p>
+
+    <div class="diagram">
+      <p class="cap">The platform stack, build-time to runtime.</p>
+      <div class="layers">
+        <div class="layer code"><div class="lt">Build &amp; framework</div><div class="lp">Vite 5, React 18, TypeScript (strict), react-router-dom v6, vite-plugin-prerender for static crawlable HTML.</div></div>
+        <div class="layer content"><div class="lt">UI &amp; styling</div><div class="lp">Tailwind CSS v3 reading FambulTik tokens as CSS variables, Radix UI primitives + <code>cva</code> styled to the TpGroup Design System, <code>lucide-react</code> icons, <code>react-helmet-async</code> for document head.</div></div>
+        <div class="layer data"><div class="lt">Backend &amp; services</div><div class="lp">Supabase (Postgres + Auth + RLS + Realtime), <code>@supabase/supabase-js</code> v2, Supabase Edge Functions (Deno) for server compute, Stripe + an email provider behind those functions, Google Maps deep links.</div></div>
+        <div class="layer code"><div class="lt">Delivery</div><div class="lp">GitHub (version control + Actions CI/SAST), Vercel (Vite preset, auto-deploy on push), Dependabot for weekly supply-chain refresh.</div></div>
+      </div>
+    </div>
+
+    <h3>Stack rationale (selected)</h3>
+    <table>
+      <tr><th>Choice</th><th>Why</th></tr>
+      <tr><td>Vite + React + TS</td><td>Sub-second dev server, ubiquitous framework, strict typing that pairs well with AI-generated code.</td></tr>
+      <tr><td>Repository pattern over the data layer</td><td>Swap JSON -&gt; Supabase -&gt; Payload without touching UI code (&sect;5).</td></tr>
+      <tr><td>Supabase</td><td>Postgres + Auth + RLS + Realtime in one platform, provisioned via the Vercel integration.</td></tr>
+      <tr><td>Edge Functions (Deno)</td><td>Hold Stripe and email secrets server-side; no secret reaches the browser bundle.</td></tr>
+      <tr><td>vite-plugin-prerender</td><td>Static HTML for crawlers and LLM ingestion - the SEO/GEO/AEO substrate.</td></tr>
+      <tr><td>Vercel</td><td>One-click deploy on push; Vite framework preset.</td></tr>
+    </table>
+
+    <h3>Design tokens</h3>
+    <p>All component visuals derive from <code>src/styles/tokens.css</code> - CSS variables that trace
+    back to the TpGroup Design System and are themed for FambulTik. Tailwind reads them as variables;
+    no magic colours appear in components. Brand primary is FambulTik orange
+    (<code>#C2410C</code>); the parent TpGroup endorsement navy is <code>#011B54</code>. Type pairs
+    Inter (sans) with Lora (display).</p>
+  </section>
+
+  <!-- ================= APPLICATION ================= -->
+  <section id="application">
+    <h2>4. Application architecture</h2>
+    <p class="sub">Modules, the domain type, the routes, and the structured-data graph that makes the
+    app legible to machines.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;5-&sect;7, &sect;9, &sect;13, &sect;14</p>
+
+    <div class="diagram">
+      <p class="cap">Module composition: pages compose components; both read through the code-layer
+      libraries; the SEO module emits the JSON-LD graph.</p>
+      <pre class="mermaid">
+flowchart TD
+  MAIN["main.tsx<br/>Router + Helmet + AuthProvider"] --> PAGES
+  subgraph PAGES["Pages"]
+    HOME["HomePage"]
+    DETAIL["AttractionDetailPage"]
+    ACCT["AccountPage (auth)"]
+    AUTH["SignIn / SignUp"]
+    ABOUT["AboutPage"]
+  end
+  PAGES --> COMP["Components<br/>NavBar, Footer, AttractionCard,<br/>HoursBlock, FaqAccordion, ..."]
+  PAGES --> LIB["lib/content<br/>attractions repo + t()"]
+  COMP --> LIB
+  PAGES --> SEO["seo/<br/>SeoHead, JsonLd, graph.ts"]
+  LIB --> DATA[("src/data/*.json")]
+  LIB --> CONTENT[("src/content/*.json")]
+  ACCT --> SUPA[("Supabase<br/>profiles, saved, bookings")]
+  SEO --> LD["JSON-LD @graph"]
+      </pre>
+    </div>
+
+    <h3>The domain type</h3>
+    <p>One <code>Attraction</code> type (<code>src/data/types.ts</code>) is shared across every
+    repository implementation - the canonical contract. It carries id, descriptions, location
+    (region + lat/long), hours, rating, images, tags, sourced URLs, optional FAQs, and a
+    <code>lastReviewed</code> date that drives JSON-LD <code>dateModified</code> (&sect;6.1).</p>
+
+    <h3>Routes</h3>
+    <table>
+      <tr><th>Route</th><th>Auth</th><th>Purpose</th></tr>
+      <tr><td><code>/</code></td><td>Public</td><td>Home - hero + attraction grid.</td></tr>
+      <tr><td><code>/attractions/:id</code></td><td>Public</td><td>Detail - gallery, hours, FAQ, directions, (P9) live reviews.</td></tr>
+      <tr><td><code>/signin</code>, <code>/signup</code></td><td>Public</td><td>Email/password + (P6) social sign-in.</td></tr>
+      <tr><td><code>/account</code></td><td><span class="badge amber">Auth</span></td><td>Bookmarks, favorites, scheduled tours.</td></tr>
+      <tr><td><code>/about</code></td><td>Public</td><td>Brand attribution, disclaimer, source credits.</td></tr>
+    </table>
+
+    <h3>SEO, GEO, AEO</h3>
+    <p>Three concentric optimisation layers, all built on prerendered HTML and the JSON-LD graph, adding
+    no new client dependency (&sect;13):</p>
+    <div class="grid cols-3">
+      <div class="card"><h4>SEO</h4><p>Semantic HTML, one h1/page, per-route title + meta via Helmet, OG/Twitter cards, canonical URLs, <code>robots.txt</code>, build-time <code>sitemap.xml</code>, prerendering.</p></div>
+      <div class="card"><h4>GEO</h4><p>Definitional lead sentences, paraphrased source attributions, per-attraction FAQ -&gt; <code>FAQPage</code> JSON-LD, <code>llms.txt</code>, visible "Last reviewed" -&gt; <code>dateModified</code>.</p></div>
+      <div class="card"><h4>AEO</h4><p>Question-shaped headings answered in the first sentence, <code>SpeakableSpecification</code> JSON-LD, self-contained FAQ answers, citable fact blocks high on the page, <code>aggregateRating</code> from P9 reviews.</p></div>
+    </div>
+
+    <h3>JSON-LD entity graph</h3>
+    <div class="diagram">
+      <p class="cap">Each page emits a Schema.org <code>@graph</code>; builders live in
+      <code>src/seo/graph.ts</code> (&sect;14).</p>
+      <pre class="mermaid">
+flowchart LR
+  ORG["Organization<br/>TpGroup (SL)"] --> TIC["TouristInformationCenter<br/>FambulTik / Salone Explorer"]
+  TIC --> SITE["WebSite"]
+  SITE --> PAGE["WebPage + BreadcrumbList"]
+  PAGE --> TA["TouristAttraction<br/>geo, hours, image, video"]
+  TA --> DEST["TouristDestination<br/>Sierra Leone"]
+  TA --> FAQ["FAQPage"]
+  TA --> RATING["aggregateRating"]
+  REV["Review (P9)"] --> RATING
+  TA --> SPEAK["SpeakableSpecification (AEO)"]
+      </pre>
+    </div>
+  </section>
+
+  <!-- ================= INFRASTRUCTURE ================= -->
+  <section id="infrastructure">
+    <h2>5. Infrastructure architecture</h2>
+    <p class="sub">From a push to a deployed site, through four mandatory quality gates.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;3, &sect;15, &sect;16, &sect;19 &middot; <code>CLAUDE.md</code> CI gates</p>
+
+    <div class="diagram">
+      <p class="cap">CI/CD pipeline: feature work integrates on <code>dev</code>; promotion to
+      <code>main</code> requires four green workflows and a human approval, then Vercel deploys.</p>
+      <pre class="mermaid">
+flowchart LR
+  DEV["push to dev"] --> CI{"CI workflows"}
+  CI --> W1["ci.yml<br/>lint, tsc, build"]
+  CI --> W2["codeql.yml<br/>static analysis"]
+  CI --> W3["security.yml<br/>Semgrep + npm audit"]
+  CI --> W4["a11y.yml<br/>axe on 5 routes"]
+  W1 & W2 & W3 & W4 --> GATE{"all green?"}
+  GATE -->|no| FIX["fix &amp; re-push"]
+  FIX --> DEV
+  GATE -->|yes| PR["promote-dev-to-main PR"]
+  PR --> HUMAN["1 human approval"]
+  HUMAN --> MAIN["merge to main"]
+  MAIN --> VERCEL["Vercel auto-deploy<br/>Root Directory: salone-explorer"]
+  VERCEL --> TAG["tag vN.N.N"]
+      </pre>
+    </div>
+
+    <div class="callout key">
+      <span class="tag">Deploy boundary</span>
+      <p>The app lives in the <code>salone-explorer/</code> subdirectory and Vercel's <strong>Root
+      Directory</strong> is set to it. Vercel clones the whole repo but builds only from that folder, so
+      the <code>.claude/</code> harness, <code>docs/</code>, and the spec are excluded from the
+      deployment by construction. CI workflows live at the repo root and run with
+      <code>working-directory: salone-explorer</code>. See ADR-09.</p>
+    </div>
+
+    <h3>The four gates</h3>
+    <table>
+      <tr><th>Workflow</th><th>Checks</th></tr>
+      <tr><td><code>ci.yml</code></td><td><code>npm ci</code>, ESLint (incl. <code>jsx-a11y</code>), <code>tsc --noEmit</code>, <code>npm run build</code>.</td></tr>
+      <tr><td><code>codeql.yml</code></td><td>GitHub CodeQL, <code>security-and-quality</code> queries.</td></tr>
+      <tr><td><code>security.yml</code></td><td>Semgrep (<code>owasp-top-ten</code>, js/ts/react, secrets) + <code>npm audit --audit-level=high</code>.</td></tr>
+      <tr><td><code>a11y.yml</code></td><td><code>@axe-core/playwright</code> on <code>/</code>, <code>/attractions/tiwai-island</code>, <code>/about</code>, <code>/signin</code>, <code>/signup</code>; fails on serious/critical.</td></tr>
+    </table>
+
+    <h3>Backend provisioning and compute</h3>
+    <p>Supabase is provisioned (Phase 5) via the Vercel integration or manually, then the &sect;6.3 schema
+    is applied with RLS before any auth feature is built. Server-side compute for the post-class phases
+    runs in <strong>Supabase Edge Functions (Deno)</strong> - they hold Stripe and email secrets, handle
+    webhooks, and send mail, so no secret reaches the browser.</p>
+
+    <h3>The secret boundary</h3>
+    <p>Only <code>VITE_</code>-prefixed variables are exposed to the browser:
+    <code>VITE_SITE_URL</code>, <code>VITE_ATTRACTIONS_SOURCE</code>, <code>VITE_SUPABASE_URL</code>,
+    <code>VITE_SUPABASE_ANON_KEY</code>, <code>VITE_STRIPE_PUBLISHABLE_KEY</code>. Server secrets
+    (<code>STRIPE_SECRET_KEY</code>, <code>STRIPE_WEBHOOK_SECRET</code>,
+    <code>EMAIL_PROVIDER_API_KEY</code>) live only as Edge Function secrets. OAuth client secrets live
+    in the Supabase dashboard, never in the client (&sect;16).</p>
+  </section>
+
+  <!-- ================= RUNTIME ================= -->
+  <section id="runtime">
+    <h2>6. Runtime architecture</h2>
+    <p class="sub">What actually happens at request time - rendering, data selection, auth, and the
+    server-verified payment path.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;5.2-&sect;5.3, &sect;6, &sect;9, &sect;13, &sect;15</p>
+
+    <h3>Page render and data selection</h3>
+    <div class="diagram">
+      <p class="cap">A detail-page render in Phase 1 (file source). The repository abstraction means the
+      same sequence holds for Supabase by flipping one env var.</p>
+      <pre class="mermaid">
+sequenceDiagram
+  participant U as Visitor / crawler
+  participant V as Vercel (prerendered HTML)
+  participant R as React app
+  participant Repo as attractions repository
+  participant Src as JSON (P1) / Supabase (P2.5)
+  U->>V: GET /attractions/tiwai-island
+  V-->>U: prerendered HTML + JSON-LD
+  U->>R: hydrate
+  R->>Repo: getById("tiwai-island")
+  Repo->>Src: read (source per VITE_ATTRACTIONS_SOURCE)
+  Src-->>Repo: Attraction | null
+  Repo-->>R: Attraction
+  R-->>U: rendered detail (copy via t(), facts via repo)
+      </pre>
+    </div>
+
+    <h3>Authentication and session (Phase 6)</h3>
+    <div class="diagram">
+      <p class="cap">Social sign-in via Supabase Auth. Provider secrets stay in Supabase; the client
+      only ever holds the anon key. <code>ProtectedRoute</code> gates <code>/account</code>.</p>
+      <pre class="mermaid">
+sequenceDiagram
+  participant U as User
+  participant App as React app
+  participant SA as Supabase Auth
+  participant P as OAuth provider
+  U->>App: click "Continue with Google"
+  App->>SA: signInWithOAuth(google)
+  SA->>P: redirect (allow-listed URL)
+  P-->>SA: identity + callback
+  SA-->>App: session (JWT)
+  App->>SA: insert profiles row (trigger handle_new_user)
+  Note over App,SA: RLS: auth.uid() = user_id on every read/write
+  U->>App: visit /account
+  App->>App: ProtectedRoute checks session
+      </pre>
+    </div>
+
+    <h3>Tour deposit and the Stripe webhook (Phase 11)</h3>
+    <div class="diagram">
+      <p class="cap">Payment status is never written by the client. The booking is marked paid only when
+      an Edge Function verifies the Stripe webhook signature (service role bypasses RLS).</p>
+      <pre class="mermaid">
+sequenceDiagram
+  participant U as User
+  participant App as React app
+  participant EF as Edge Function
+  participant ST as Stripe
+  U->>App: Schedule a Tour + deposit
+  App->>EF: request PaymentIntent
+  EF->>ST: create intent (STRIPE_SECRET_KEY)
+  ST-->>EF: client_secret
+  EF-->>App: client_secret
+  App->>ST: Checkout/Elements (VITE_STRIPE_PUBLISHABLE_KEY)
+  ST-->>EF: webhook (signed)
+  EF->>EF: verify signature (STRIPE_WEBHOOK_SECRET)
+  EF->>EF: mark payments + tour_bookings paid (service role)
+      </pre>
+    </div>
+
+    <h3>Real-time reviews (Phase 9)</h3>
+    <p>The detail page subscribes to Supabase Realtime over the <code>reviews</code> table. Published
+    reviews stream in live; an auth-gated form submits one review per user per attraction. Only
+    <code>status = 'published'</code> rows are publicly visible (RLS), and the published set feeds the
+    <code>aggregateRating</code> in the JSON-LD graph - closing the loop with AEO (&sect;9.3, &sect;13.3,
+    &sect;14).</p>
+  </section>
+
+  <!-- ================= AI-LED SDLC ================= -->
+  <section id="ai-sdlc">
+    <h2>7. AI-led SDLC tooling</h2>
+    <p class="sub">The <code>.claude/</code> harness that produces and ships this app - and the 80/20
+    responsibility split that keeps a human accountable.</p>
+    <p class="src"><b>Source</b> <code>CLAUDE.md</code> &middot; <code>.claude/rules/*</code> &middot; <code>docs/dev-guide/claude-harness.md</code> &middot; <a href="onboarding.html">onboarding.html</a></p>
+
+    <p>Salone Explorer ships an AI-led software development lifecycle, not just an app spec. Claude Code
+    does roughly 80% of the engineering; a human keeps the accountable 20%. The harness is what makes
+    that safe: binding rules, mandatory sessions, governance hooks, slash commands, skills, and
+    subagents.</p>
+
+    <div class="grid cols-3">
+      <div class="card accent"><h4>8 rules</h4><p>Loaded every session, binding. <code>three-layer-separation</code> (keystone), <code>engineering-principles</code>, <code>spec-first</code>, <code>commit-conventions</code>, <code>branch-conventions</code>, <code>test-conventions</code>, <code>api-conventions</code>, <code>80-20-split</code>.</p></div>
+      <div class="card accent"><h4>6 governance hooks</h4><p><code>user-prompt-submit</code> (require SPEC/issue ref), <code>pre-tool-bash</code> (secret scan, trailer check, block force-push/<code>--no-verify</code>), <code>pre/post-tool-edit</code> (file-header enforcement), <code>session-start</code>, <code>stop-session</code>.</p></div>
+      <div class="card accent"><h4>9 subagents</h4><p><code>orchestrator</code>, <code>architect</code>, <code>product-analyst</code>, <code>code-reviewer</code>, <code>security-reviewer</code>, <code>qa-engineer</code>, <code>docs-writer</code>, <code>seo-analyst</code>, <code>web-crawler</code>.</p></div>
+    </div>
+    <div class="grid cols-2" style="margin-top:14px;">
+      <div class="card"><h4>16 commands</h4><p>Session lifecycle (<code>session-start/update/end/resume/current/list</code>), <code>orchestrate</code>, <code>issue-start</code>, <code>code-push</code>, <code>handoff</code>, <code>quality</code>, <code>status</code>, <code>tokens</code>, <code>dev-start</code>, <code>session-autonomous-coding</code>.</p></div>
+      <div class="card"><h4>14 skills</h4><p><code>plan-then-code</code>, <code>verification-loop</code>, <code>tdd-workflow</code>, <code>unit-testing</code>, <code>accessibility-testing</code>, <code>e2e-testing</code>, <code>secret-scanning</code>, <code>seo-audit</code>, <code>aeo</code>, <code>geo</code>, <code>crawl-site</code>, <code>tech-stack-audit</code>, <code>audit-pptx</code>, <code>sierra-leone-tourist-expert</code>.</p></div>
+    </div>
+
+    <h3>The development pipeline</h3>
+    <p>A GitHub issue becomes a reviewed PR along a fixed path. Claude drives every step except plan
+    approval and merge.</p>
+    <div class="pipe">
+      <div class="step"><div class="n">01</div><div class="t">/orchestrate</div><div class="d">Four-check pre-flight: traceable source, phase preconditions, dependencies, edge cases. Writes a context pack.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><div class="n">02</div><div class="t">plan-then-code</div><div class="d">Explore, plan, get human approval before any production file is edited.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><div class="n">03</div><div class="t">implement</div><div class="d">Code, data, content, tests, docs - respecting the three layers.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><div class="n">04</div><div class="t">verification-loop</div><div class="d">Secret scan, lint, typecheck, unit, a11y smoke, build, three-layer grep.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><div class="n">05</div><div class="t">review</div><div class="d">code-reviewer + security-reviewer first pass.</div></div>
+      <div class="arrow">&rarr;</div>
+      <div class="step"><div class="n">06</div><div class="t">/handoff</div><div class="d">Draft PR with full description. Human reviews and merges.</div></div>
+    </div>
+
+    <h3>The 80/20 split</h3>
+    <div class="grid cols-2">
+      <div class="card"><h4>AI does (80%)</h4><p>Read SPEC + issue, produce the context pack, write the plan, implement across layers, run verification, spawn reviewers, update docs, open the draft PR.</p></div>
+      <div class="card"><h4>Human does (20%)</h4><p>Approve the plan, sign off ADRs and SPEC deviations, review the PR, resolve ambiguity, final security sign-off, click merge. Claude is denied <code>gh pr merge</code> by settings and hook.</p></div>
+    </div>
+
+    <div class="callout key">
+      <span class="tag">Mechanically enforced</span>
+      <p>Sessions are mandatory and are the durable memory between runs. Code-producing prompts must
+      reference a SPEC phase/section or a GitHub issue. Commits need a traceability trailer. New source
+      files need a one-line header. Secrets, force-push, <code>reset --hard</code>,
+      <code>--no-verify</code>, and <code>gh pr merge</code> are hard-blocked.</p>
+    </div>
+  </section>
+
+  <!-- ================= TESTING ================= -->
+  <section id="testing">
+    <h2>8. Testing approach</h2>
+    <p class="sub">Layered gates, cheapest first, with accessibility as a hard CI condition.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;10, &sect;18, &sect;20 &middot; rule <code>test-conventions</code> &middot; skills <code>verification-loop</code>, <code>tdd-workflow</code></p>
+
+    <div class="diagram">
+      <p class="cap">The test pyramid for Salone Explorer - and where each runs.</p>
+      <div class="layers">
+        <div class="layer content"><div class="lt">Unit (Vitest)</div><div class="lp">Lowest-cost behaviour gate. Pure functions and small units - repository shaping, <code>t()</code> resolution, JSON-LD builders. One test per branch. Behaviour-named. No network.</div></div>
+        <div class="layer data"><div class="lt">Accessibility (Playwright + axe)</div><div class="lp"><code>@axe-core/playwright</code> against WCAG 2.2 AA across five smoke routes. Mirrors the <code>a11y.yml</code> gate; fails on serious or critical violations.</div></div>
+        <div class="layer code"><div class="lt">E2E (Playwright)</div><div class="lp">Reserved for the highest-visibility user journeys. Slow and flaky-prone; needs a running server. Used sparingly.</div></div>
+      </div>
+    </div>
+
+    <h3>Verification loop</h3>
+    <p>The single quality gate before <code>/handoff</code> and at any natural pause: secret scan, lint,
+    typecheck, unit tests, build, a11y smoke, and the three-layer grep checks. It returns a pass/fail
+    report; work does not proceed past a failure. The <code>quality</code> command wraps it with an
+    optional E2E step and prints a PASS/FAIL matrix.</p>
+
+    <h3>TDD where it fits</h3>
+    <p>For well-specified, behaviour-driven changes, the <code>tdd-workflow</code> authors a failing
+    Vitest test per acceptance criterion, confirms it fails for the right reason, writes the minimum
+    code to pass, then refactors. Acceptance criteria live in SPEC &sect;20, per phase.</p>
+
+    <h3>Accessibility posture</h3>
+    <p>WCAG 2.2 AA is a hard requirement, not a nice-to-have. Automated: axe in CI plus Lighthouse
+    a11y &ge; 95. Manual: a keyboard-only walkthrough and one screen-reader pass per release. Linting:
+    <code>eslint-plugin-jsx-a11y</code> (recommended); errors fail the build and may never be disabled
+    to make a build pass (&sect;10).</p>
+
+    <div class="callout warn">
+      <span class="tag">Non-negotiable</span>
+      <p>Never disable a feature, assertion, lint rule, or check solely to make a test or build pass.
+      Fix the root cause. The three-layer grep (zero hard-coded strings or attraction facts under
+      <code>src/components</code>, <code>src/pages</code>, <code>src/lib</code>) is part of the gate.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECURITY ================= -->
+  <section id="security">
+    <h2>9. Security architecture</h2>
+    <p class="sub">Defence in depth: a secret boundary the client cannot cross, RLS on every user table,
+    and SAST in CI.</p>
+    <p class="src"><b>Source</b> <a href="../SPEC.md">SPEC</a> &sect;6.3, &sect;6.6, &sect;15, &sect;16, &sect;22 &middot; rule <code>engineering-principles</code></p>
+
+    <div class="diagram">
+      <p class="cap">Trust boundaries. The browser holds only public keys; secrets and privileged writes
+      live server-side.</p>
+      <pre class="mermaid">
+flowchart TB
+  subgraph BROWSER["Browser (untrusted)"]
+    APP["React app"]
+    PUB["VITE_ public keys only<br/>anon key, Stripe publishable"]
+  end
+  subgraph EDGE["Supabase (trusted server)"]
+    RLS["Postgres + RLS<br/>auth.uid() = user_id"]
+    EF["Edge Functions<br/>service-role writes"]
+    SEC["Secrets: Stripe, email,<br/>OAuth provider secrets"]
+  end
+  subgraph EXT["External"]
+    ST["Stripe"]
+    EM["Email provider"]
+  end
+  APP -->|"anon key + JWT"| RLS
+  APP -->|"request only"| EF
+  EF --> SEC
+  EF -->|"verified webhook"| ST
+  EF --> EM
+  EF -->|"privileged write"| RLS
+  PUB -. never holds secrets .-> SEC
+      </pre>
+    </div>
+
+    <h3>Controls</h3>
+    <table>
+      <tr><th>Surface</th><th>Control</th></tr>
+      <tr><td>Secrets</td><td>Only <code>VITE_</code> vars reach the browser. Stripe/email/OAuth secrets are Edge Function or Supabase-dashboard secrets. A pre-commit secret scanner hard-blocks leaks.</td></tr>
+      <tr><td>Data access</td><td>RLS enabled on every user-scoped table (<code>profiles</code>, <code>saved_attractions</code>, <code>tour_bookings</code>, <code>reviews</code>, <code>payments</code>) with <code>auth.uid() = user_id</code> policies. New user-scoped table = RLS in the same migration.</td></tr>
+      <tr><td>Payments (P11)</td><td>Stripe webhooks verified by signature before any DB write. Payment status written only by the Edge Function (service role); there is deliberately no client insert/update policy on <code>payments</code>.</td></tr>
+      <tr><td>Reviews (P9)</td><td>Bodies sanitised, length-bounded, rate-limited; <code>status</code> gates public display (moderation).</td></tr>
+      <tr><td>Auth (P6)</td><td>OAuth redirect URLs allow-listed in Supabase; no open redirect.</td></tr>
+      <tr><td>Transport &amp; headers</td><td><code>rel="noopener noreferrer"</code> on outbound links; security headers (<code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, <code>X-Frame-Options</code>) via <code>vercel.json</code>.</td></tr>
+      <tr><td>SAST</td><td>CodeQL + Semgrep (OWASP top-ten, js/ts/react, secrets) + <code>npm audit</code> + Dependabot, all in CI; merges to <code>main</code> require them green.</td></tr>
+    </table>
+
+    <div class="callout warn">
+      <span class="tag">Phase 11 caveat</span>
+      <p>The disclaimer states no payments are processed. That holds for Phases 1-7. Before enabling
+      live Stripe payments, the &sect;17 disclaimer must be revised to reflect real payments, with the
+      corresponding terms and refund policy.</p>
+    </div>
+  </section>
+
+  <!-- ================= ADR ================= -->
+  <section id="adr">
+    <h2>Architecture decisions</h2>
+    <p class="sub">The cross-cutting decisions, each with its rationale and its SPEC anchor. Formal ADRs
+    live in <code>docs/adr/</code>; these are the standing decisions the SPEC already encodes.</p>
+
+    <div class="adr">
+      <div class="id">ADR-01</div>
+      <h4>Strict three-layer separation (code / data / content)</h4>
+      <div class="row"><b>Decision:</b> No component, page, or library holds a user-facing string or an attraction fact. Strings live in <code>src/content/</code>, facts in <code>src/data/</code>.</div>
+      <div class="row"><b>Why:</b> Removes the editorial bottleneck, makes i18n possible, and prevents content drift. It is the bridge to Phase 8 (Payload CMS).</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;5, &sect;5.5 &middot; rule <code>three-layer-separation</code></div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-02</div>
+      <h4>Repository pattern over the data layer</h4>
+      <div class="row"><b>Decision:</b> All data access goes through an <code>AttractionRepository</code> interface selected by <code>VITE_ATTRACTIONS_SOURCE</code>. Components never import JSON directly.</div>
+      <div class="row"><b>Why:</b> Swap JSON -&gt; Supabase -&gt; Payload without touching UI code. Proven by the Phase 2.5 migration that changes no component.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;5.2.3, &sect;5.3 &middot; rule <code>api-conventions</code></div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-03</div>
+      <h4>File-first store, database optional</h4>
+      <div class="row"><b>Decision:</b> Phase 1 reads attractions from JSON. Supabase is the optional Phase 2.5 migration, not a Phase 1 dependency.</div>
+      <div class="row"><b>Why:</b> Ships a deployable site in ~45 minutes with zero backend; defers infrastructure cost until auth genuinely needs it.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;2, &sect;5.2</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-04</div>
+      <h4>Supabase with RLS on every user-scoped table</h4>
+      <div class="row"><b>Decision:</b> User data lives in Postgres with row-level security and <code>auth.uid() = user_id</code> policies, applied in the same migration as the table.</div>
+      <div class="row"><b>Why:</b> Authorisation enforced at the database, not the client. No table ships without its policy.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;6.3, &sect;6.6, &sect;15</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-05</div>
+      <h4>Supabase Edge Functions for server compute</h4>
+      <div class="row"><b>Decision:</b> Stripe and email run server-side in Edge Functions (Deno), holding all secrets and verifying webhooks.</div>
+      <div class="row"><b>Why:</b> No secret reaches the browser bundle; privileged writes (payment status) happen only server-side via the service role.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;3, &sect;15, &sect;16</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-06</div>
+      <h4>Prerendering for crawlers and LLMs</h4>
+      <div class="row"><b>Decision:</b> <code>vite-plugin-prerender</code> emits static HTML for <code>/</code>, <code>/about</code>, and every attraction; pages carry a JSON-LD <code>@graph</code> and <code>llms.txt</code>.</div>
+      <div class="row"><b>Why:</b> SEO, GEO, and AEO all require machine-legible, scroll-free answers in static HTML.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;3, &sect;13, &sect;14</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-07</div>
+      <h4>Stripe-hosted checkout for PCI scope</h4>
+      <div class="row"><b>Decision:</b> Payments use Stripe Checkout/Elements; the app never handles card data. Status is confirmed only by a signature-verified webhook.</div>
+      <div class="row"><b>Why:</b> Keeps PCI scope with Stripe and prevents client-forged payment state.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;3, &sect;6.6, &sect;9.4, &sect;15</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-08</div>
+      <h4>Payload CMS deferred to Phase 8</h4>
+      <div class="row"><b>Decision:</b> Editorial content stays file-based until a future Phase 8 introduces a <code>payloadAttractionRepository</code>; Supabase keeps user-generated data, Payload owns editorial.</div>
+      <div class="row"><b>Why:</b> The repository pattern built on day one is the recognised bridge; no rewrite needed when the team is ready.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;5.4, &sect;21</div>
+    </div>
+
+    <div class="adr">
+      <div class="id">ADR-09</div>
+      <h4>App isolated in a subdirectory, separate from the harness</h4>
+      <div class="row"><b>Decision:</b> The Vite app is scaffolded into <code>salone-explorer/</code>; the <code>.claude/</code> harness and <code>docs/</code> stay at the repo root. Vercel's Root Directory is set to <code>salone-explorer</code>; CI runs with <code>working-directory: salone-explorer</code>.</div>
+      <div class="row"><b>Why:</b> The production deployment never contains the AI tooling or docs - the boundary is explicit and enforced by construction, not by an ignore list. The app stays self-contained and portable.</div>
+      <div class="row"><b>Source:</b> <a href="../SPEC.md">SPEC</a> &sect;12, &sect;18, &sect;19 &middot; <a href="adr/0001-app-subdirectory-separation.md">ADR 0001</a></div>
+    </div>
+  </section>
+
+  <!-- ================= PRINCIPLES ================= -->
+  <section id="principles">
+    <h2>Principles</h2>
+    <p class="sub">The binding engineering principles every agent and human follows. Each maps to a rule
+    or a SPEC section.</p>
+    <p class="src"><b>Source</b> rule <code>engineering-principles</code> &middot; <code>CLAUDE.md</code> &middot; <a href="../SPEC.md">SPEC</a> &sect;22</p>
+
+    <div class="grid cols-2">
+      <div class="card accent"><h4>Architecture over quick fixes</h4><p>Choose the right shape, not the fast one. Plan before code; justify the decision first. Quick fixes that defer cost are technical debt.</p></div>
+      <div class="card accent"><h4>Fail fast, no silent fallbacks</h4><p>Errors raise loudly with context. Validate explicitly at every boundary - route params, form input, env var, Supabase response, repository return.</p></div>
+      <div class="card accent"><h4>Security up-front</h4><p>Think OWASP top-ten and stack-specific risks (XSS, open redirect, missing auth, RLS gaps, exposed <code>VITE_</code> secrets) before writing, not after.</p></div>
+      <div class="card accent"><h4>No magic values</h4><p>Constants in named config or design tokens; environment-specific values via <code>VITE_</code> vars. No hardcoded defaults.</p></div>
+      <div class="card accent"><h4>Stack-idiomatic style</h4><p>TS strict, no <code>any</code>, function components + hooks, repository pattern for data, RLS on every user table, tokens for every visual.</p></div>
+      <div class="card accent"><h4>Smallest viable diff</h4><p>Edit only what the phase or issue requires. No drive-by refactors. Granular, testable TODOs.</p></div>
+      <div class="card accent"><h4>SPEC is the source of truth</h4><p>No code without a traceable source - a SPEC phase/section, a tracked issue, or an incident. SPEC wins over CLAUDE.md and the rules when they disagree.</p></div>
+      <div class="card accent"><h4>Stop and ask</h4><p>Do not deviate from SPEC &sect;5 (architecture), &sect;6.1 (type), &sect;6.3 (schema), &sect;8 (brand), &sect;10 (a11y), or &sect;12 (structure) without asking. When ambiguous, ask - do not guess.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Salone Explorer - Architecture Reference. Published by TpGroup (SL) Limited under the FambulTik
+    brand. This document mirrors <a href="../SPEC.md">SPEC.md</a> (the single source of truth) and is a
+    sibling to <a href="onboarding.html">onboarding.html</a>. When this page and SPEC.md disagree,
+    SPEC.md wins.</p>
+    <p>A TpGroup company. Built with Claude Code.</p>
+  </footer>
+</main>
+</div>
+
+<script type="module">
+  // Mermaid renders the flow, sequence, and graph diagrams. Loaded from the
+  // jsDelivr CDN - the single external dependency on this page.
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "dark",
+    themeVariables: {
+      darkMode: true,
+      background: "#161d22",
+      primaryColor: "#1c252b",
+      primaryBorderColor: "#2a363d",
+      primaryTextColor: "#e7edf0",
+      lineColor: "#9fb0b8",
+      secondaryColor: "#163d2a",
+      tertiaryColor: "#16293d",
+      fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
+    },
+    flowchart: { curve: "basis", useMaxWidth: true },
+    sequence: { useMaxWidth: true }
+  });
+
+  // Scroll-spy: highlight the active section in the sidebar.
+  const links = Array.from(document.querySelectorAll('nav.side ol > li > a'));
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const ids = Array.from(map.keys())
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+  const spy = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const a = map.get(e.target.id);
+        if (a) a.classList.add('active');
+      }
+    }
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  ids.forEach(el => spy.observe(el));
+</script>
+</body>
+</html>

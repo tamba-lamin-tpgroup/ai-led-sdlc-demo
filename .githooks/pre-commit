@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# pre-commit - tool-agnostic staged-change gate.
+# Runs for every commit regardless of the authoring tool (Claude Code,
+# Codex, Gemini, or a bare terminal). Reproduces, at the git layer, the
+# checks Claude Code enforces via settings.json PreToolUse hooks:
+#   1. secret scan         (mirrors scan-secrets.sh / pre-tool-bash.sh)
+#   2. new-file header     (mirrors pre-tool-edit.sh)
+#   3. three-layer grep    (mirrors verification-loop SKILL.md)
+# See docs/dev-guide/multi-tool-enforcement.md.
+#
+# Exit 0 = allow. Non-zero = block.
+#
+# Known gap: `git commit --no-verify` skips this hook. CI is the backstop.
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPTS_DIR="$REPO_ROOT/.claude/scripts"
+APP_SRC_PREFIX="salone-explorer/src"
+fail=0
+
+# Collect staged paths once. ACM = added, copied, modified (not deleted).
+# Read with a while-loop (not mapfile) for bash 3.2 (macOS) compatibility.
+staged=()
+while IFS= read -r line; do staged+=("$line"); done \
+  < <(git diff --cached --name-only --diff-filter=ACM)
+added=()
+while IFS= read -r line; do added+=("$line"); done \
+  < <(git diff --cached --name-only --diff-filter=A)
+if [ "${#staged[@]}" -eq 0 ]; then exit 0; fi
+
+# --- 1. Secret scan (reuse the single source of truth) --------------------
+if [ -x "$SCRIPTS_DIR/scan-secrets.sh" ]; then
+  if ! "$SCRIPTS_DIR/scan-secrets.sh" --staged; then
+    >&2 echo "[blocked] secret scanner found a finding in the staged change"
+    fail=1
+  fi
+else
+  >&2 echo "[warn] .claude/scripts/scan-secrets.sh not found or not executable; skipping secret scan"
+fi
+
+# --- 2. New source files must carry a one-line purpose header -------------
+# Mirrors pre-tool-edit.sh: data/content JSON, docs, config are exempt.
+for path in ${added[@]+"${added[@]}"}; do
+  case "$path" in
+    *.md|*.txt|*.json|*.yml|*.yaml|*.toml|*.lock|*.gitignore|*.gitmodules|*.template|*.example|*.css|*.svg|*.html) continue ;;
+  esac
+  case "$path" in
+    *.ts|*.tsx|*.js|*.jsx|*.sh|*.py|*.sql) ;;
+    *) continue ;;
+  esac
+  # Read the staged blob (the index), not the working tree, so the gate
+  # validates exactly what is about to be committed.
+  first_line="$(git -C "$REPO_ROOT" show ":$path" 2>/dev/null \
+    | awk 'NF{print; exit}' || true)"
+  case "$first_line" in
+    '#'*|'//'*|'/*'*|'"""'*) ;;
+    *)
+      >&2 echo "[blocked] new source file lacks a one-line file-purpose comment: $path"
+      fail=1 ;;
+  esac
+done
+
+# --- 3. Three-layer separation grep on staged app source ------------------
+# Scope: salone-explorer/src/{components,pages,lib} *.ts/*.tsx, excluding
+# src/lib/content. No-op until the app is scaffolded.
+code_layer=()
+for path in ${staged[@]+"${staged[@]}"}; do
+  case "$path" in
+    "$APP_SRC_PREFIX"/components/*.ts|"$APP_SRC_PREFIX"/components/*.tsx|\
+    "$APP_SRC_PREFIX"/pages/*.ts|"$APP_SRC_PREFIX"/pages/*.tsx|\
+    "$APP_SRC_PREFIX"/lib/*.ts|"$APP_SRC_PREFIX"/lib/*.tsx)
+      case "$path" in
+        "$APP_SRC_PREFIX"/lib/content/*) continue ;;
+      esac
+      # Repo-relative path; the scan runs against the staged blob via
+      # `git grep --cached`, not the working-tree file.
+      code_layer+=("$path") ;;
+  esac
+done
+
+if [ "${#code_layer[@]}" -gt 0 ]; then
+  # Scan staged content (the index), not the working tree, so the gate
+  # matches exactly what is about to be committed. `git grep --cached`
+  # exits 0 when it finds a match and 1 when it does not.
+  # (a) Hard-coded English UI strings or known attraction names.
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nE '"[A-Z][a-z]+( [A-Za-z]+){1,}"' -- "${code_layer[@]}" 2>/dev/null)"; then
+    >&2 echo "[blocked] three-layer (a): hard-coded English string in the code layer"
+    >&2 echo "$hits"
+    fail=1
+  fi
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nEi 'Tiwai Island|Bunce Island|River No\. ?2|Freetown|Banana Island|Outamba' -- "${code_layer[@]}" 2>/dev/null)"; then
+    >&2 echo "[blocked] three-layer (a): hard-coded attraction name in the code layer"
+    >&2 echo "$hits"
+    fail=1
+  fi
+  # (b) Direct src/data/*.json imports (must go through the barrel).
+  if hits="$(git -C "$REPO_ROOT" grep --cached -nE "from ['\"].*/data/.*\.json['\"]|import .*['\"].*/data/.*\.json['\"]" -- "${code_layer[@]}" 2>/dev/null)"; then
+    >&2 echo "[blocked] three-layer (b): direct data import bypasses the repository barrel"
+    >&2 echo "$hits"
+    fail=1
+  fi
+fi
+
+if [ "$fail" -ne 0 ]; then
+  >&2 echo "pre-commit: one or more gates failed; commit aborted."
+  exit 1
+fi
+exit 0
