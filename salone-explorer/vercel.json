@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd salone-explorer && npm install",
-  "buildCommand": "cd salone-explorer && npm run build:prerender",
-  "outputDirectory": "salone-explorer/dist",
   "routes": [
     {
       "src": "/(.*)",
