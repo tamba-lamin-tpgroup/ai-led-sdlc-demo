@@ -58,7 +58,7 @@ export default function SignUpPage() {
 
             <p className="mt-6 text-center text-sm text-text-muted">
               {t("auth.signUp.hasAccount")}{" "}
-              <Link to="/signin" className="text-brand-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded">
+              <Link to="/signin" className="text-brand-accent underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded">
                 {t("auth.signUp.signIn")}
               </Link>
             </p>
