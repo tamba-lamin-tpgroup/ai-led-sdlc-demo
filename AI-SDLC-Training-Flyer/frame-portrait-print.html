@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SLINT Workshop — Portrait (print)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+    --azure:#1C9FD8;
+    --azure-deep:#0E7BB0;
+    --navy:#102A41;
+    --navy-2:#1C3F5C;
+    --green:#82C341;
+    --green-deep:#6BA834;
+    --coral:#D97757;
+    --bg:#FFFFFF;
+    --wash:#F1F7FB;
+    --wash-2:#E7F1F8;
+    --ink:#13283A;
+    --muted:#5E7384;
+    --line:#DCE8F0;
+    --line-soft:#EAF1F6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#0d1620;}
+
+  /* ============ FLYER ROOT ============ */
+  .fl{
+    position:relative;
+    width:100%;height:100%;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .fl-arcs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .fl-pad{position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;}
+  .fl-pad > *:not(.grow){flex-shrink:0;}
+
+  /* ---- header ---- */
+  .fl-head{display:flex;align-items:center;justify-content:space-between;}
+  .fl-brand{display:flex;align-items:center;gap:14px;}
+  .fl-brand img{display:block;}
+  .fl-brand-tx{display:flex;flex-direction:column;line-height:1;}
+  .fl-brand-tx b{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;color:var(--navy);letter-spacing:-.01em;}
+  .fl-brand-tx span{font-weight:600;color:var(--muted);letter-spacing:.02em;}
+
+  .fl-pill{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;
+    color:var(--navy);background:#fff;border:1.5px solid var(--line);
+    border-radius:999px;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;
+  }
+  .fl-dot{width:9px;height:9px;border-radius:50%;background:#e0413e;
+    box-shadow:0 0 0 0 rgba(224,65,62,.5);animation:pulse 2s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,65,62,.45)}70%{box-shadow:0 0 0 9px rgba(224,65,62,0)}100%{box-shadow:0 0 0 0 rgba(224,65,62,0)}}
+
+  /* ---- eyebrow + title ---- */
+  .fl-eyebrow{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--azure-deep);
+    text-transform:uppercase;display:flex;align-items:center;gap:12px;}
+  .fl-eyebrow::after{content:"";height:1.5px;flex:1;background:linear-gradient(90deg,var(--line),transparent);}
+  .fl-title{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;color:var(--navy);
+    letter-spacing:-.025em;line-height:1.02;margin:0;text-wrap:balance;}
+  .fl-title .hl{color:var(--azure);}
+  .fl-sub{color:var(--muted);font-weight:500;line-height:1.45;margin:0;text-wrap:pretty;max-width:62ch;}
+
+  /* ---- pipeline ---- */
+  .fl-pipe{display:flex;align-items:stretch;gap:0;background:var(--wash);
+    border:1.5px solid var(--line-soft);border-radius:18px;}
+  .fl-node{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:9px;text-align:center;position:relative;}
+  .fl-node .nlab{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.08em;}
+  .fl-node .nname{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;color:var(--navy);line-height:1.05;white-space:nowrap;}
+  .fl-node .nmark{display:flex;align-items:center;justify-content:center;border-radius:14px;
+    background:#fff;border:1.5px solid var(--line);}
+  .fl-arrow{display:flex;align-items:center;color:var(--azure);flex:0 0 auto;}
+  .fl-node.final .nmark{background:linear-gradient(135deg,var(--azure),var(--azure-deep));border:none;}
+  .fl-node.final .nname{color:var(--navy);}
+  .fl-livechip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',ui-monospace,monospace;
+    font-weight:700;color:var(--green-deep);background:rgba(130,195,65,.14);
+    border-radius:999px;letter-spacing:.06em;}
+
+  /* ---- chips ---- */
+  .fl-chips{display:flex;flex-wrap:wrap;}
+  .fl-chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);
+    border-radius:999px;font-weight:600;color:var(--navy-2);}
+  .fl-chip i{width:7px;height:7px;border-radius:2px;display:block;}
+
+  /* ---- session list (portrait) ---- */
+  .fl-list{display:grid;grid-template-columns:1fr 1fr;}
+  .fl-li{display:flex;align-items:flex-start;gap:12px;color:var(--navy-2);font-weight:600;}
+  .fl-li svg{flex:0 0 auto;margin-top:1px;}
+  .fl-seclab{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--azure-deep);
+    text-transform:uppercase;letter-spacing:.16em;}
+
+  /* ---- host ---- */
+  .fl-host{display:flex;align-items:center;gap:18px;}
+  .fl-host .ph{border-radius:50%;object-fit:cover;object-position:50% 18%;
+    border:3px solid #fff;box-shadow:0 6px 20px rgba(16,42,65,.18);}
+  .fl-host .meta{display:flex;flex-direction:column;line-height:1.12;}
+  .fl-host .meta .role{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--azure-deep);
+    text-transform:uppercase;letter-spacing:.12em;}
+  .fl-host .meta .nm{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;color:var(--navy);letter-spacing:-.01em;white-space:nowrap;}
+  .fl-host .meta .ti{color:var(--muted);font-weight:600;}
+  .fl-host .meta .cred{color:var(--muted);font-weight:600;line-height:1.4;text-wrap:pretty;}
+  .fl-host .meta .lnk{display:inline-flex;align-items:center;gap:7px;color:var(--azure-deep);font-weight:700;text-decoration:none;font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .fl-host .meta .lnk svg{flex:0 0 auto;}
+
+  /* ---- details / cta ---- */
+  .fl-when{display:flex;align-items:center;}
+  .fl-when .cell{display:flex;flex-direction:column;line-height:1.1;}
+  .fl-when .cell .k{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.1em;}
+  .fl-when .cell .v{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;color:var(--navy);white-space:nowrap;}
+  .fl-when .div{width:1.5px;background:var(--line);align-self:stretch;}
+
+  .fl-cta{display:inline-flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,var(--azure),var(--azure-deep));color:#fff;
+    font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;border-radius:14px;
+    box-shadow:0 10px 24px rgba(28,159,216,.34);white-space:nowrap;}
+  .fl-cta .arr{display:flex;}
+  .fl-price{color:var(--muted);font-weight:600;white-space:nowrap;}
+  .fl-price b{color:var(--green-deep);}
+
+  .fl-foot{display:flex;align-items:center;justify-content:space-between;
+    color:var(--muted);font-weight:600;border-top:1.5px solid var(--line-soft);}
+  .fl-foot .site{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:var(--navy);letter-spacing:.02em;}
+
+  /* spacer */
+  .grow{flex:1 1 auto;}
+
+  /* ============ WIDE (landscape) ============ */
+  .fl.wide .fl-pad{flex-direction:row;}
+  .fl-wcontent{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .fl-wphoto{flex:0 0 38%;position:relative;background:var(--navy);overflow:hidden;}
+  .fl-wphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%;}
+  .fl-wphoto .scrim{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(16,42,65,.05) 40%,rgba(16,42,65,.92) 100%);}
+  .fl-wphoto .plate{position:absolute;left:0;right:0;bottom:0;color:#fff;}
+  .fl-wphoto .plate .role{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;color:#8fd3f4;
+    text-transform:uppercase;letter-spacing:.14em;}
+  .fl-wphoto .plate .nm{font-family:'Space Grotesk','Manrope',sans-serif;font-weight:700;letter-spacing:-.01em;}
+  .fl-wphoto .plate .ti{color:rgba(255,255,255,.8);font-weight:600;}
+  .fl-wphoto .plate .cred{color:rgba(255,255,255,.82);font-weight:600;line-height:1.4;text-wrap:pretty;}
+  .fl-wphoto .plate .lnk{display:inline-flex;align-items:center;gap:7px;color:#8fd3f4;font-weight:700;text-decoration:none;font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .fl-wphoto .plate .lnk svg{flex:0 0 auto;}
+  .fl-wphoto .toppill{position:absolute;top:0;left:0;}
+</style>
+<style>
+  html,body{background:#fff;margin:0;padding:0;}
+  @media print{
+    @page{ size:1080px 1350px; margin:0; }
+    html,body{width:1080px;height:1350px;background:#fff;}
+    #shot-portrait{ break-inside:avoid; }
+    .fl, .fl *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  }
+</style>
+</head><body>
+<div id="root"></div>
+<script>window.__FRAME__="portrait";window.__EXPORT__=1;</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" data-presets="react">
+/* global React, ReactDOM, DesignCanvas, DCSection, DCArtboard */
+const { useState } = React;
+
+/* ----------------------------- tool marks ----------------------------- */
+function Sparkle({ s = 26, c = "var(--coral)" }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill={c} aria-hidden="true">
+      <path d="M12 1.2 L13.9 9.6 L22.8 12 L13.9 14.4 L12 22.8 L10.1 14.4 L1.2 12 L10.1 9.6 Z" />
+      <path d="M19 2.5 L19.8 5.4 L22.7 6.2 L19.8 7 L19 9.9 L18.2 7 L15.3 6.2 L18.2 5.4 Z" opacity="0.7" />
+    </svg>
+  );
+}
+function GitBranch({ s = 26, c = "var(--navy)" }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="6" y1="3" x2="6" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />
+    </svg>
+  );
+}
+function Triangle({ s = 26, c = "var(--navy)" }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill={c} aria-hidden="true"><path d="M12 3.5 L22 20.5 L2 20.5 Z" /></svg>
+  );
+}
+function Globe({ s = 28, c = "#fff" }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.2" /><path d="M2.8 12h18.4" /><path d="M12 2.8a14.5 14.5 0 0 1 0 18.4 14.5 14.5 0 0 1 0-18.4" />
+    </svg>
+  );
+}
+function Check({ s = 20 }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="rgba(130,195,65,.16)" />
+      <path d="M7 12.4 L10.4 15.8 L17 8.8" stroke="var(--green-deep)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function Arrow({ s = 22 }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 12h15" /><path d="M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+function LinkedIn({ s = 16, c = "var(--azure-deep)" }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill={c} aria-hidden="true">
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.8 0 0 .77 0 1.73v20.54C0 23.23.8 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.73V1.73C24 .77 23.2 0 22.23 0z" />
+    </svg>
+  );
+}
+
+/* ----------------------------- brand arcs bg ----------------------------- */
+function Arcs() {
+  return (
+    <svg className="fl-arcs" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="ag1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#1C9FD8" /><stop offset="1" stopColor="#82C341" />
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke="url(#ag1)" strokeWidth="2.5" opacity="0.10">
+        <ellipse cx="860" cy="120" rx="360" ry="150" transform="rotate(-28 860 120)" />
+        <ellipse cx="900" cy="160" rx="250" ry="105" transform="rotate(-28 900 160)" />
+        <ellipse cx="120" cy="900" rx="320" ry="135" transform="rotate(-24 120 900)" />
+      </g>
+      <circle cx="978" cy="58" r="6" fill="#82C341" opacity="0.5" />
+      <circle cx="40" cy="788" r="6" fill="#1C9FD8" opacity="0.45" />
+    </svg>
+  );
+}
+
+/* ----------------------------- shared bits ----------------------------- */
+function Brand({ logo = 44, name = 16, sub = 10.5 }) {
+  return (
+    <div className="fl-brand">
+      <img src="assets/slint-logo.png" width={logo} height={logo} alt="SLINT logo" />
+      <div className="fl-brand-tx" style={{ gap: name * 0.18 }}>
+        <b style={{ fontSize: name }}>SLINT</b>
+        <span style={{ fontSize: sub }}>Sierra Leoneans in Technology</span>
+      </div>
+    </div>
+  );
+}
+
+function LivePill({ fs = 12.5, py = 9, px = 16 }) {
+  return (
+    <span className="fl-pill" style={{ fontSize: fs, padding: `${py}px ${px}px` }}>
+      <span className="fl-dot" /> Live&nbsp;·&nbsp;Virtual
+    </span>
+  );
+}
+
+function Pipeline({ scale = 1 }) {
+  const box = 56 * scale, mark = 30 * scale;
+  const node = (markEl, lab, name, final) => (
+    <div className={"fl-node" + (final ? " final" : "")} style={{ gap: 9 * scale }}>
+      <div className="nmark" style={{ width: box, height: box, borderRadius: 15 * scale }}>{markEl}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3 * scale, alignItems: "center" }}>
+        <span className="nname" style={{ fontSize: 16.5 * scale }}>{name}</span>
+        <span className="nlab" style={{ fontSize: 10 * scale }}>{lab}</span>
+      </div>
+    </div>
+  );
+  const arr = <div className="fl-arrow"><Arrow s={22 * scale} /></div>;
+  return (
+    <div className="fl-pipe" style={{ padding: `${24 * scale}px ${18 * scale}px`, borderRadius: 18 * scale }}>
+      {node(<Sparkle s={mark} />, "AI Coding", "Claude Code")}
+      {arr}
+      {node(<GitBranch s={mark} />, "Version", "GitHub")}
+      {arr}
+      {node(<Triangle s={mark} />, "Deploy", "Vercel")}
+      {arr}
+      {node(<Globe s={mark + 2} />, "Production", "Live App", true)}
+    </div>
+  );
+}
+
+function Chips({ fs = 14.5, scale = 1 }) {
+  const items = [
+    ["Agentic AI vs. Chatbots", "var(--azure)"],
+    ["AI-Led SDLC", "var(--green)"],
+    ["Prompt → Production", "var(--azure-deep)"],
+    ["Real-Time Deploy", "var(--coral)"],
+  ];
+  return (
+    <div className="fl-chips" style={{ gap: 10 * scale }}>
+      {items.map(([t, c]) => (
+        <span className="fl-chip" key={t} style={{ fontSize: fs, padding: `${9 * scale}px ${15 * scale}px`, borderRadius: 999 }}>
+          <i style={{ background: c }} />{t}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function Host({ ph = 88, scale = 1 }) {
+  return (
+    <div className="fl-host" style={{ gap: 20 * scale }}>
+      <img className="ph" src="assets/host-portrait.jpg" width={ph} height={ph} alt="Tamba Sheku Lamin" style={{ width: ph, height: ph }} />
+      <div className="meta" style={{ gap: 5 * scale, maxWidth: 820 }}>
+        <span className="role" style={{ fontSize: 11 * scale }}>Hosted by</span>
+        <span className="nm" style={{ fontSize: 23 * scale }}>Tamba Sheku Lamin</span>
+        <span className="ti" style={{ fontSize: 13.5 * scale }}>Former President, SLINT</span>
+        <span className="cred" style={{ fontSize: 12.5 * scale, marginTop: 2 * scale }}>
+          Co-Founder &amp; Group CEO, TpGROUP (SL) Ltd · Senior Technology Architect / FDE @ Accenture Song
+        </span>
+        <a className="lnk" href="https://www.linkedin.com/in/tambalamin/" style={{ fontSize: 12.5 * scale, marginTop: 13 * scale }}>
+          <LinkedIn s={15 * scale} /> linkedin.com/in/tambalamin
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function When({ scale = 1 }) {
+  const cell = (k, v) => (
+    <div className="cell" style={{ gap: 5 * scale, padding: `0 ${16 * scale}px` }}>
+      <span className="k" style={{ fontSize: 10.5 * scale }}>{k}</span>
+      <span className="v" style={{ fontSize: 18 * scale }}>{v}</span>
+    </div>
+  );
+  return (
+    <div className="fl-when">
+      <div style={{ paddingLeft: 0 }}>{cell("Date", "Sat · Jun 13")}</div>
+      <div className="div" /> {cell("Time", "2:00 PM EST")}
+      <div className="div" /> {cell("Length", "45–90 min")}
+    </div>
+  );
+}
+
+function Cta({ scale = 1, stacked, hidePrice }) {
+  return (
+    <div style={{ display: "flex", flexDirection: stacked ? "column" : "row", alignItems: stacked ? "flex-start" : "center", gap: 14 * scale }}>
+      <span className="fl-cta" style={{ fontSize: 18 * scale, padding: `${15 * scale}px ${26 * scale}px`, borderRadius: 14 * scale }}>
+        Register — It’s Free <span className="arr"><Arrow s={20 * scale} /></span>
+      </span>
+      {!hidePrice && (
+        <span className="fl-price" style={{ fontSize: 13.5 * scale }}>
+          <b>Free</b> for SLINT members · <b style={{ color: "var(--navy)" }}>$10</b> non-members
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ----------------------------- VERTICAL layout ----------------------------- */
+function Vertical({ tall }) {
+  const pad = tall ? 74 : 68;
+  return (
+    <div className="fl">
+      <Arcs />
+      <div className="fl-pad" style={{ padding: pad, gap: tall ? 0 : 0 }}>
+        <div className="fl-head"><Brand logo={46} name={17} sub={11} /><LivePill /></div>
+
+        <div style={{ marginTop: tall ? 40 : 30 }}>
+          <div className="fl-eyebrow" style={{ fontSize: 13.5, letterSpacing: ".2em" }}>SLINT · Agentic AI Workshop</div>
+          <h1 className="fl-title" style={{ fontSize: tall ? 66 : 60, marginTop: 20 }}>
+            Build &amp; Deploy a <span className="hl">Live</span> AI-Powered Web App
+          </h1>
+          <p className="fl-sub" style={{ fontSize: tall ? 22 : 20.5, marginTop: 18 }}>
+            A hands-on, live-coding session on Agentic AI and the AI-led software development lifecycle — watch a real app go from idea to the open web.
+          </p>
+        </div>
+
+        {tall && <div className="grow" />}
+
+        <div style={{ marginTop: tall ? 44 : 30 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <span className="fl-seclab" style={{ fontSize: 11.5 }}>The Workflow · Prompt → Production</span>
+            <span className="fl-livechip" style={{ fontSize: 11.5, padding: "6px 12px" }}>● Built live on stage</span>
+          </div>
+          <Pipeline scale={1} />
+          <p className="fl-sub" style={{ fontSize: 15.5, marginTop: 14, color: "var(--navy-2)", fontWeight: 600 }}>
+            We’ll build <b style={{ color: "var(--azure-deep)" }}>Salone Explorer</b> — a real Sierra Leone tour-guide app — and ship it to production during the session.
+          </p>
+        </div>
+
+        {tall && (
+          <div style={{ marginTop: 38 }}>
+            <span className="fl-seclab" style={{ fontSize: 11.5 }}>In This Session</span>
+            <div className="fl-list" style={{ gap: "16px 34px", marginTop: 16 }}>
+              {[
+                "Agentic AI vs. AI chatbots, in practice",
+                "The AI-led SDLC, end to end",
+                "Live coding inside a real IDE",
+                "Claude Code, GitHub & Vercel workflow",
+              ].map((t) => (
+                <div className="fl-li" key={t} style={{ fontSize: 16 }}><Check s={22} /><span>{t}</span></div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!tall && <div className="grow" />}
+
+        <div style={{ marginTop: tall ? 30 : 22, paddingTop: tall ? 28 : 20, borderTop: "1.5px solid var(--line-soft)" }}>
+          <Host ph={tall ? 100 : 90} />
+        </div>
+
+        <div style={{ marginTop: tall ? 26 : 20, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+          <When />
+          <Cta hidePrice />
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontWeight: 700, fontSize: 14, color: "var(--azure-deep)" }}>Register → bit.ly/slint-ai-workshop</div>
+          <div style={{ marginTop: 7, fontSize: 13, color: "var(--muted)", fontWeight: 600 }}>
+            <b style={{ color: "var(--green-deep)" }}>Free</b> for SLINT members · <b style={{ color: "var(--navy)" }}>$10</b> non-members · Zoom link emailed after verification.
+          </div>
+        </div>
+
+        <div className="fl-foot" style={{ marginTop: 18, paddingTop: 16, fontSize: 12.5 }}>
+          <span>Co-organized by <b style={{ color: "var(--navy)" }}>Cecil John</b> &amp; the SLINT Executive</span>
+          <span className="site">slint.org</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- WIDE layout ----------------------------- */
+function Wide() {
+  return (
+    <div className="fl wide">
+      <div className="fl-pad">
+        <div className="fl-wcontent" style={{ padding: 52 }}>
+          <Arcs />
+          <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", height: "100%" }}>
+            <div className="fl-head"><Brand logo={40} name={15} sub={9.5} /><LivePill fs={11} py={7} px={13} /></div>
+
+            <div style={{ marginTop: 24 }}>
+              <div className="fl-eyebrow" style={{ fontSize: 12, letterSpacing: ".2em" }}>SLINT · Agentic AI Workshop</div>
+              <h1 className="fl-title" style={{ fontSize: 43, marginTop: 13 }}>
+                Build &amp; Deploy a <span className="hl">Live</span><br />AI-Powered Web App
+              </h1>
+              <p className="fl-sub" style={{ fontSize: 16, marginTop: 12, maxWidth: "30ch" }}>
+                Hands-on live coding with Agentic AI — from prompt to production, end to end.
+              </p>
+            </div>
+
+            <div style={{ marginTop: 20 }}><Pipeline scale={0.74} /></div>
+
+            <div className="grow" />
+
+            <div style={{ marginTop: 18, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <When scale={0.92} />
+              <Cta scale={0.86} hidePrice />
+            </div>
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace", fontWeight: 700, fontSize: 12.5, color: "var(--azure-deep)" }}>Register → bit.ly/slint-ai-workshop</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>
+                <b style={{ color: "var(--green-deep)" }}>Free</b> for members · <b style={{ color: "var(--navy)" }}>$10</b> non-members · Zoom link emailed after verification.
+              </div>
+            </div>
+            <div className="fl-foot" style={{ marginTop: 16, paddingTop: 12, fontSize: 11 }}>
+              <span>Co-organized by <b style={{ color: "var(--navy)" }}>Cecil John</b> &amp; the SLINT Executive</span>
+              <span className="site">slint.org</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="fl-wphoto">
+          <img src="assets/host-portrait.jpg" alt="Tamba Sheku Lamin" />
+          <div className="scrim" />
+          <div className="toppill" style={{ padding: 18 }}></div>
+          <div className="plate" style={{ padding: 24 }}>
+            <span className="role" style={{ fontSize: 10.5 }}>Hosted by</span>
+            <div className="nm" style={{ fontSize: 24, marginTop: 6 }}>Tamba Sheku Lamin</div>
+            <div className="ti" style={{ fontSize: 13, marginTop: 4 }}>Former President, SLINT</div>
+            <div className="cred" style={{ fontSize: 11.5, marginTop: 7 }}>Co-Founder &amp; Group CEO, TpGROUP (SL) Ltd · Sr. Technology Architect / FDE @ Accenture Song</div>
+            <a className="lnk" href="https://www.linkedin.com/in/tambalamin/" style={{ fontSize: 11.5, marginTop: 13 }}><LinkedIn s={14} c="#8fd3f4" /> linkedin.com/in/tambalamin</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- single-frame export mode ----------------------------- */
+function Frame({ kind }) {
+  const dims = { square: [1080, 1080], portrait: [1080, 1350], landscape: [1200, 675] }[kind];
+  const inner = kind === "landscape" ? <Wide /> : <Vertical tall={kind === "portrait"} />;
+  const exp = window.__EXPORT__;
+  const fit = () => {
+    const el = document.getElementById("frame");
+    if (!el) return;
+    const s = Math.min(window.innerWidth / dims[0], window.innerHeight / dims[1]);
+    el.style.transform = `translate(-50%,-50%) scale(${s})`;
+  };
+  React.useEffect(() => { if (exp) return; fit(); window.addEventListener("resize", fit); return () => window.removeEventListener("resize", fit); });
+  if (exp) {
+    return (
+      <div style={{ position: "fixed", inset: 0, background: "#fff", overflow: "hidden" }}>
+        <div id={"shot-" + kind} style={{ position: "absolute", top: 0, left: 0, width: dims[0], height: dims[1] }}>
+          {inner}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#0d1620", overflow: "hidden" }}>
+      <div id="frame" style={{ position: "absolute", top: "50%", left: "50%", transformOrigin: "center center", width: dims[0], height: dims[1], boxShadow: "0 30px 90px rgba(0,0,0,.5)" }}>
+        {inner}
+      </div>
+    </div>
+  );
+}
+
+/* ----------------------------- canvas ----------------------------- */
+function App() {
+  const h = window.__FRAME__ || (window.location.hash || "").replace("#", "");
+  if (["square", "portrait", "landscape"].includes(h)) return <Frame kind={h} />;
+  return (
+    <DesignCanvas>
+      <DCSection id="social" title="SLINT Agentic AI Workshop — Social Flyers" subtitle="Same design, three posting-ready sizes">
+        <DCArtboard id="square" label="Square · 1080×1080 — Instagram / Facebook / LinkedIn" width={1080} height={1080}>
+          <Vertical />
+        </DCArtboard>
+        <DCArtboard id="portrait" label="Portrait · 1080×1350 — Instagram feed (max reach)" width={1080} height={1350}>
+          <Vertical tall />
+        </DCArtboard>
+        <DCArtboard id="landscape" label="Landscape · 1200×675 — X / Twitter / LinkedIn link" width={1200} height={675}>
+          <Wide />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+<script>
+  (function () {
+    function ready() {
+      var el = document.getElementById('shot-portrait');
+      return el && el.querySelector('.fl-host img');
+    }
+    function waitRender(cb) { if (ready()) return cb(); setTimeout(function () { waitRender(cb); }, 100); }
+    window.addEventListener('load', function () {
+      waitRender(function () {
+        var fonts = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+        fonts.then(function () { setTimeout(function () { window.print(); }, 600); });
+      });
+    });
+  })();
+</script>
+</body></html>
