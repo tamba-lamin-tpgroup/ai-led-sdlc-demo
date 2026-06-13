@@ -1,0 +1,366 @@
+[
+  {
+    "id": "tiwai-island",
+    "name": "Tiwai Island Wildlife Sanctuary",
+    "shortDescription": "West Africa's largest primate sanctuary, home to pygmy hippos and eleven monkey species on a river island.",
+    "longDescription": "Tiwai Island Wildlife Sanctuary sits in the Moa River in Pujehun District, covering approximately 120 square kilometres of rainforest. The island is one of the highest-density primate habitats in the world, sheltering eleven species of monkey alongside chimpanzees and the rare pygmy hippopotamus. Guided night walks reveal a remarkable array of nocturnal wildlife, and the surrounding river offers canoeing and boat safaris. Conservation programmes run by local communities have sustained the sanctuary since the early 1980s, making it a model for community-based ecotourism in West Africa. Accommodation is available in simple but comfortable lodges on the island, and the journey from Freetown by road and then dugout canoe is itself an adventure through the Southern Province.",
+    "location": {
+      "region": "Pujehun District, Southern Province",
+      "latitude": 7.5527,
+      "longitude": -11.3317
+    },
+    "hours": {
+      "open": "07:00",
+      "close": "18:00",
+      "daysOpen": "Monday to Sunday",
+      "notes": "Night walks available by arrangement with on-site guides. Confirm availability locally before travel."
+    },
+    "rating": 4.7,
+    "reviewCount": 312,
+    "images": [
+      "/images/attractions/tiwai-island.webp"
+    ],
+    "tags": [
+      "wildlife",
+      "ecotourism",
+      "island",
+      "primates",
+      "rainforest"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "How do I reach Tiwai Island?",
+        "answer": "Travel south from Freetown by road to Potoru (approximately 5–6 hours), then cross the Moa River by dugout canoe. Most visitors arrange transport through a tour operator in Freetown."
+      },
+      {
+        "question": "What wildlife can I expect to see?",
+        "answer": "The island hosts eleven primate species including Diana monkeys, colobus, and chimpanzees, as well as the pygmy hippopotamus, forest elephants, and over 135 bird species."
+      },
+      {
+        "question": "Is accommodation available on the island?",
+        "answer": "Yes, there are basic lodges managed by the community. Booking ahead is strongly recommended, especially during peak season (November to May)."
+      }
+    ],
+    "lastReviewed": "2025-01-15"
+  },
+  {
+    "id": "river-no-2-beach",
+    "name": "River No. 2 Beach",
+    "shortDescription": "A palm-fringed estuary beach on the Freetown Peninsula, renowned for its calm lagoon and local fishing community.",
+    "longDescription": "River No. 2 Beach lies on the Atlantic coast of the Freetown Peninsula, roughly 25 kilometres south of the city. The beach takes its name from the small river that meets the sea here, forming a calm, sheltered lagoon ideal for swimming. A local Temne fishing village sits behind the dunes, and residents offer guided canoe trips up the river into mangrove forest. The beach is consistently listed among Sierra Leone's finest for its combination of white sand, clear water, and striking coconut palms. A small bar and informal food stalls serve fresh seafood. The road from Freetown passes through the lush hills of the peninsula, offering panoramic views of the Atlantic on the descent.",
+    "location": {
+      "region": "Western Area Peninsula",
+      "latitude": 8.3833,
+      "longitude": -13.2167
+    },
+    "hours": {
+      "open": "06:00",
+      "close": "19:00",
+      "daysOpen": "Monday to Sunday",
+      "notes": "Open beach — access is unrestricted. Facilities run by the local community; hours vary seasonally."
+    },
+    "rating": 4.5,
+    "reviewCount": 528,
+    "images": [
+      "/images/attractions/river-no-2-beach.webp"
+    ],
+    "tags": [
+      "beach",
+      "swimming",
+      "family",
+      "fishing",
+      "lagoon"
+    ],
+    "sources": [
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "Is River No. 2 Beach safe for swimming?",
+        "answer": "The lagoon is calm and generally safe for swimming. Ocean currents beyond the sandbar can be strong — swim within the lagoon and heed local advice."
+      },
+      {
+        "question": "How far is it from Freetown?",
+        "answer": "Approximately 25 km by road, around 40–50 minutes depending on traffic and road conditions."
+      }
+    ],
+    "lastReviewed": "2025-02-10"
+  },
+  {
+    "id": "bunce-island",
+    "name": "Bunce Island",
+    "shortDescription": "The ruins of an 18th-century British slave fort in the Sierra Leone River, a sombre heritage site of global significance.",
+    "longDescription": "Bunce Island stands at the centre of the Sierra Leone River estuary, roughly 30 kilometres upstream from Freetown. Between the 1670s and 1808, British merchants operated a slave-trading fort here that dispatched tens of thousands of enslaved Africans to plantations in South Carolina, Georgia, and the Caribbean. The island is now a UNESCO-associated heritage site and one of the best-preserved slave fort ruins in West Africa. Walking among the crumbling battery walls, warehouses, and cannon mounts, visitors confront a physical record of one of history's gravest injustices. Many African-Americans with South Carolina Gullah-Geechee heritage trace their ancestry directly to captives held at Bunce Island, and the site draws diaspora visitors from the United States and the Caribbean seeking to connect with that history.",
+    "location": {
+      "region": "Sierra Leone River Estuary, Western Area",
+      "latitude": 8.5731,
+      "longitude": -12.9561
+    },
+    "hours": {
+      "open": "08:00",
+      "close": "16:00",
+      "daysOpen": "Tuesday to Sunday",
+      "notes": "Access is by boat from Freetown's Government Wharf. Guided tours available — confirm schedule and boat departure times locally before travel."
+    },
+    "rating": 4.6,
+    "reviewCount": 184,
+    "images": [
+      "/images/attractions/bunce-island.webp"
+    ],
+    "tags": [
+      "history",
+      "heritage",
+      "slave-trade",
+      "UNESCO",
+      "diaspora"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://www.sierraleoneheritage.org/museum",
+      "https://sierra-leone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "How do I get to Bunce Island?",
+        "answer": "Organised boat tours depart from Freetown's Government Wharf. The crossing takes approximately 45 minutes. Independent travel by private boat is possible but guided tours are strongly recommended."
+      },
+      {
+        "question": "Why is Bunce Island historically significant?",
+        "answer": "It was one of the largest British slave-trading forts in West Africa. The enslaved people held here were principally transported to rice plantations in South Carolina and Georgia, forming the cultural root of the Gullah-Geechee people."
+      }
+    ],
+    "lastReviewed": "2025-01-20"
+  },
+  {
+    "id": "tacugama-chimpanzee-sanctuary",
+    "name": "Tacugama Chimpanzee Sanctuary",
+    "shortDescription": "A rehabilitation centre for orphaned and injured chimpanzees set within the Western Area Peninsula National Park.",
+    "longDescription": "Tacugama Chimpanzee Sanctuary occupies 100 acres of forest within the Western Area Peninsula National Park, approximately 30 minutes from central Freetown. Founded in 1995 by Bala Amarasekaran and his wife Sharmila, the sanctuary rescues and rehabilitates chimpanzees that have been orphaned by the bushmeat trade or kept illegally as pets. Over 100 chimpanzees are currently in residence, moving through a phased programme designed to return them eventually to wild forest groups. Guided tours wind through the forest enclosures, offering close but safe observation of family groups. Tacugama also operates conservation education programmes in local schools and supports community livelihoods in adjacent villages. The surrounding national park adds hiking and birdwatching as complementary activities.",
+    "location": {
+      "region": "Western Area Peninsula National Park",
+      "latitude": 8.4547,
+      "longitude": -13.1658
+    },
+    "hours": {
+      "open": "08:30",
+      "close": "17:00",
+      "daysOpen": "Monday to Sunday",
+      "notes": "Last tour begins at 15:00. Book in advance at busy periods."
+    },
+    "rating": 4.8,
+    "reviewCount": 445,
+    "images": [
+      "/images/attractions/tacugama-chimpanzee-sanctuary.webp"
+    ],
+    "videoUrl": "https://www.youtube.com/watch?v=DummyTacugamaVideo",
+    "tags": [
+      "wildlife",
+      "conservation",
+      "primates",
+      "chimpanzees",
+      "ecotourism"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "Can I volunteer at Tacugama?",
+        "answer": "Tacugama welcomes volunteers with relevant skills. Contact the sanctuary directly through their official website for details on programmes and availability."
+      },
+      {
+        "question": "Is it safe to visit with children?",
+        "answer": "Yes, the sanctuary is family-friendly. Children must remain with adults and stay within the guided tour path at all times."
+      }
+    ],
+    "lastReviewed": "2025-03-01"
+  },
+  {
+    "id": "sierra-leone-national-museum",
+    "name": "Sierra Leone National Museum",
+    "shortDescription": "The country's foremost museum of cultural heritage, housing artefacts spanning Sierra Leone's pre-colonial, colonial, and post-independence history.",
+    "longDescription": "The Sierra Leone National Museum sits in central Freetown on Siaka Stevens Street, housed in a colonial-era cotton tree building that has become a city landmark. Its permanent collection ranges from pre-colonial ceremonial masks and Temne, Mende, and Limba regalia to exhibits documenting the founding of Freetown by freed and recaptured enslaved Africans, the Krio (Creole) cultural heritage, and the country's independence in 1961. A significant section addresses Sierra Leone's civil conflict of the 1990s and the subsequent reconciliation process. The museum also holds the archives of the Sierra Leone Heritage Project, making it a research resource for diaspora family history. Temporary exhibitions, educational workshops, and guided tours are available; the knowledgeable staff offer deep contextual commentary not available from the exhibits alone.",
+    "location": {
+      "region": "Freetown, Western Area",
+      "latitude": 8.4897,
+      "longitude": -13.2343
+    },
+    "hours": {
+      "open": "09:00",
+      "close": "17:00",
+      "daysOpen": "Monday to Friday",
+      "notes": "Saturday by appointment. Closed Sundays and public holidays. Hours may vary — confirm locally."
+    },
+    "rating": 4.3,
+    "reviewCount": 267,
+    "images": [
+      "/images/attractions/sierra-leone-national-museum.webp"
+    ],
+    "tags": [
+      "history",
+      "culture",
+      "museum",
+      "heritage",
+      "Krio"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://www.sierraleoneheritage.org/museum",
+      "https://sierra-leone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "Is there an entry fee?",
+        "answer": "A small entry fee applies. Rates for residents and non-residents differ; confirm current fees at the entrance or by contacting the museum directly."
+      },
+      {
+        "question": "Does the museum have a gift shop?",
+        "answer": "Yes, a small shop sells publications, postcards, and craft items produced by local artisans."
+      }
+    ],
+    "lastReviewed": "2025-01-30"
+  },
+  {
+    "id": "banana-islands",
+    "name": "Banana Islands",
+    "shortDescription": "A cluster of three small islands off the Freetown Peninsula, offering pristine beaches, snorkelling, and traces of Portuguese colonial history.",
+    "longDescription": "The Banana Islands — Dublin, Mes-Meheux, and Ricketts — lie a short boat ride off the southern tip of the Freetown Peninsula. The Portuguese established a trading post here in the 16th century, and the ruins of a small chapel and cemetery survive as reminders of that era. Today the islands are prized for their empty white-sand beaches, crystal-clear water, and healthy coral reefs that support vibrant snorkelling and diving. A small fishing community inhabits Mes-Meheux, welcoming visitors with fresh seafood and informal guesthouses. There are no cars on the islands; walking and canoe are the only modes of travel, lending the Banana Islands a rare atmosphere of unhurried peace. Dolphin sightings in the surrounding waters are common, particularly in the early morning.",
+    "location": {
+      "region": "Off the Freetown Peninsula, Western Area",
+      "latitude": 8.25,
+      "longitude": -13.0333
+    },
+    "hours": {
+      "open": "00:00",
+      "close": "23:59",
+      "daysOpen": "Monday to Sunday",
+      "notes": "Open island — no formal entry restrictions. Boat crossings from Kent village subject to sea conditions and boatman availability."
+    },
+    "rating": 4.6,
+    "reviewCount": 198,
+    "images": [
+      "/images/attractions/banana-islands.webp"
+    ],
+    "tags": [
+      "island",
+      "snorkelling",
+      "history",
+      "beach",
+      "dolphins"
+    ],
+    "sources": [
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/",
+      "https://ntb.gov.sl/"
+    ],
+    "faqs": [
+      {
+        "question": "How do I reach the Banana Islands?",
+        "answer": "Take a taxi or poda-poda to Kent village at the southern tip of the Freetown Peninsula, then charter a local boat. The crossing takes 15–30 minutes depending on sea conditions."
+      },
+      {
+        "question": "Is there accommodation on the islands?",
+        "answer": "Simple guesthouses and beach campsites are available on Mes-Meheux. Book ahead for peak periods (December to April)."
+      }
+    ],
+    "lastReviewed": "2025-02-05"
+  },
+  {
+    "id": "outamba-kilimi-national-park",
+    "name": "Outamba-Kilimi National Park",
+    "shortDescription": "Sierra Leone's largest national park, sheltering forest elephants, hippopotamuses, and chimpanzees in the Northern Province.",
+    "longDescription": "Outamba-Kilimi National Park stretches across approximately 1,100 square kilometres of savanna, gallery forest, and wetland in the Northern Province, straddling Bombali and Karene Districts. It is Sierra Leone's largest protected area and supports one of the country's most significant populations of forest elephants, alongside pygmy hippopotamuses, chimpanzees, leopards, buffaloes, and over 150 bird species. Two rivers, the Little Scarcies and the Mabole, wind through the park, providing river safari routes. A small tented camp operated by the national park authority offers rustic but comfortable accommodation. Reaching the park requires a full day of travel from Freetown on increasingly rough roads, making it a destination for committed wildlife enthusiasts rather than day-trippers — but that remoteness is also the source of its singular atmosphere.",
+    "location": {
+      "region": "Bombali and Karene Districts, Northern Province",
+      "latitude": 9.7833,
+      "longitude": -12.7167
+    },
+    "hours": {
+      "open": "06:00",
+      "close": "18:00",
+      "daysOpen": "Monday to Sunday",
+      "notes": "Access and game drives subject to ranger availability and seasonal road conditions. Confirm ahead of travel with the park authority or a Freetown-based tour operator."
+    },
+    "rating": 4.4,
+    "reviewCount": 89,
+    "images": [
+      "/images/attractions/outamba-kilimi-national-park.webp"
+    ],
+    "tags": [
+      "safari",
+      "hippos",
+      "elephants",
+      "national-park",
+      "wildlife"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://tourismsierraleone.com/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "What is the best time of year to visit?",
+        "answer": "The dry season (November to April) offers the best road access and wildlife viewing. During the wet season (May to October) tracks may be impassable."
+      },
+      {
+        "question": "Is a guide required?",
+        "answer": "A ranger guide is mandatory within the park. Guides can be arranged on arrival at the park entrance or in advance through a tour operator in Freetown or Makeni."
+      }
+    ],
+    "lastReviewed": "2025-01-10"
+  },
+  {
+    "id": "mount-bintumani",
+    "name": "Mount Bintumani (Loma Mountains)",
+    "shortDescription": "The highest peak in Sierra Leone and West Africa west of Cameroon, rising to 1,945 m in the Koinadugu District.",
+    "longDescription": "Mount Bintumani, also known as Loma Mansa, crowns the Loma Mountains in Koinadugu District at 1,945 metres above sea level — the highest point in Sierra Leone and in West Africa west of Mount Cameroon. The mountain sits within the Loma Mountains Forest Reserve, a biodiversity hotspot of montane rainforest, heath, and grassland that shelters chimpanzees, forest elephants, several endemic plant species, and rare highland birds. The standard ascent from Benekoro village takes two days, with a basic camp at the summit plateau. The trail rewards climbers with panoramic views across the Guinea Highlands and, on clear days, a vista stretching to Guinea and Liberia. The trek is demanding — expect steep, muddy paths — and is best attempted with an experienced local guide arranged through Kabala town.",
+    "location": {
+      "region": "Koinadugu District, Northern Province",
+      "latitude": 9.1467,
+      "longitude": -11.1583
+    },
+    "hours": {
+      "open": "00:00",
+      "close": "23:59",
+      "daysOpen": "Monday to Sunday",
+      "notes": "No formal entry gate. A local guide is essential; arrange through Kabala town. Permits may be required from the Forestry Division — confirm before travel."
+    },
+    "rating": 4.8,
+    "reviewCount": 74,
+    "images": [
+      "/images/attractions/mount-bintumani.webp"
+    ],
+    "tags": [
+      "hiking",
+      "mountain",
+      "biodiversity",
+      "forest-reserve",
+      "highland"
+    ],
+    "sources": [
+      "https://ntb.gov.sl/",
+      "https://sierra-leone.org/",
+      "https://www.visitsierraleone.org/"
+    ],
+    "faqs": [
+      {
+        "question": "How fit do I need to be to climb Bintumani?",
+        "answer": "A reasonable level of fitness is required. The two-day ascent involves steep, uneven terrain. Altitude sickness is not typically a concern at 1,945 m but preparation is important."
+      },
+      {
+        "question": "What should I bring?",
+        "answer": "Sturdy hiking boots, rain gear (conditions change rapidly), warm layers for the summit night, water purification, and enough food for two days. Your guide can advise on local provisioning in Kabala."
+      }
+    ],
+    "lastReviewed": "2025-01-05"
+  }
+]

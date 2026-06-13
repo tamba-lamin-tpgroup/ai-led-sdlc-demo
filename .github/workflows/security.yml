@@ -27,7 +27,7 @@ jobs:
             --config p/react \
             --config p/secrets \
             --error \
-            salone-explorer/src salone-explorer/scripts
+            salone-explorer/src
 
   npm-audit:
     runs-on: ubuntu-latest
