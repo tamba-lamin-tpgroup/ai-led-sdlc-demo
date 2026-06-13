@@ -41,20 +41,20 @@ export default function Footer() {
           </nav>
 
           <div>
-            <p className="font-semibold text-sm uppercase tracking-wide text-white/50 mb-3">
-              Disclaimer
+            <p className="font-semibold text-sm uppercase tracking-wide text-white/60 mb-3">
+              {t("about.disclaimer.heading")}
             </p>
-            <p className="text-xs text-white/60 leading-relaxed">
+            <p className="text-xs text-white/70 leading-relaxed">
               {t("disclaimer.full")}
             </p>
           </div>
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/50">
+          <p className="text-xs text-white/60">
             &copy; {year} {t("footer.copyright")} {t("footer.publisher")}
           </p>
-          <p className="text-xs text-white/40">{t("footer.credit")}</p>
+          <p className="text-xs text-white/60">{t("footer.credit")}</p>
         </div>
       </div>
     </footer>

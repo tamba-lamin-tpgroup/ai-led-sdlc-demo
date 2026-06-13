@@ -21,6 +21,7 @@ export default function AttractionDetailPage() {
   const [attraction, setAttraction] = useState<Attraction | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [heroImgError, setHeroImgError] = useState(false);
 
   useEffect(() => {
     if (!id) { setNotFound(true); setLoading(false); return; }
@@ -127,7 +128,7 @@ export default function AttractionDetailPage() {
           </nav>
 
           {/* Hero image */}
-          {attraction.images.length > 0 && (
+          {attraction.images.length > 0 && !heroImgError && (
             <div className="relative h-64 sm:h-96 overflow-hidden bg-surface">
               <img
                 src={attraction.images[0]}
@@ -135,6 +136,7 @@ export default function AttractionDetailPage() {
                 className="h-full w-full object-cover"
                 width={1280}
                 height={720}
+                onError={() => setHeroImgError(true)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true" />
             </div>

@@ -113,6 +113,8 @@
   "about.disclaimer.heading": "Disclaimer",
   "about.sources.heading": "Data Sources",
   "about.sources.intro": "Attraction information is paraphrased from these authoritative sources:",
+  "about.ds.heading": "Design credits",
+  "about.ds.name": "TpGroup Design System",
   "about.ds.credit": "Interface designed with the TpGroup Design System.",
 
   "errors.generic": "Something went wrong. Please try again.",

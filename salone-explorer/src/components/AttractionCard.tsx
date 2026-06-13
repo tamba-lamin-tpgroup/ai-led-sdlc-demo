@@ -1,8 +1,9 @@
 // Card component for an attraction in the home-page grid.
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Star } from "lucide-react";
 import type { Attraction } from "@/data/types";
-import { t, } from "@/lib/content";
+import { t } from "@/lib/content";
 import { cn, formatRating } from "@/lib/utils";
 
 interface AttractionCardProps {
@@ -11,8 +12,10 @@ interface AttractionCardProps {
 }
 
 export default function AttractionCard({ attraction, className }: AttractionCardProps) {
+  const [imgError, setImgError] = useState(false);
   const href = `/attractions/${attraction.id}`;
   const image = attraction.images[0];
+  const showImage = !!image && !imgError;
 
   return (
     <article className={cn("group rounded-xl border border-border bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow", className)}>
@@ -23,7 +26,7 @@ export default function AttractionCard({ attraction, className }: AttractionCard
         tabIndex={0}
       >
         <div className="relative aspect-[16/9] overflow-hidden bg-surface">
-          {image ? (
+          {showImage ? (
             <img
               src={image}
               alt={attraction.name}
@@ -31,6 +34,7 @@ export default function AttractionCard({ attraction, className }: AttractionCard
               loading="lazy"
               width={640}
               height={360}
+              onError={() => setImgError(true)}
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-brand-sand">

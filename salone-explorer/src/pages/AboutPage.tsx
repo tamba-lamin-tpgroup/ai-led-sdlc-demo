@@ -1,4 +1,5 @@
 // About page — FambulTik brand, disclaimer, data sources. Public route at /about.
+import { useMemo } from "react";
 import { ExternalLink } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -11,7 +12,7 @@ const SITE_URL = import.meta.env.VITE_SITE_URL ?? "https://slint-ai-sldc-demo.tp
 const SOURCES = getSources();
 
 export default function AboutPage() {
-  const graph = buildGraph([buildWebSiteSchema()]);
+  const graph = useMemo(() => buildGraph([buildWebSiteSchema()]), []);
 
   return (
     <>
@@ -63,7 +64,7 @@ export default function AboutPage() {
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-brand-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded"
+                      className="inline-flex items-center gap-1.5 text-brand-accent underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded"
                     >
                       {s.name}
                       <ExternalLink size={13} aria-label="(opens in new tab)" />
@@ -75,16 +76,16 @@ export default function AboutPage() {
 
             {/* DS credit */}
             <section aria-labelledby="ds-heading">
-              <h2 id="ds-heading" className="sr-only">Design credits</h2>
+              <h2 id="ds-heading" className="sr-only">{t("about.ds.heading")}</h2>
               <p className="text-sm text-text-muted">
                 {t("about.ds.credit")}{" "}
                 <a
                   href="https://design.tpgroupsl.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded"
+                  className="text-brand-accent underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent rounded"
                 >
-                  TpGroup Design System
+                  {t("about.ds.name")}
                   <ExternalLink size={12} className="inline ml-0.5" aria-label="(opens in new tab)" />
                 </a>
               </p>

@@ -47,12 +47,12 @@ export default function HomePage() {
             className="bg-tpgroup-primary text-white py-20 px-4 sm:px-6 lg:px-8"
           >
             <div className="mx-auto max-w-4xl text-center">
-              <p className="text-brand-primary font-medium text-sm uppercase tracking-widest mb-3">
+              <p className="text-brand-sand font-medium text-sm uppercase tracking-widest mb-3">
                 {t("app.brand")}
               </p>
               <h1
                 id="hero-heading"
-                className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+                className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white"
               >
                 {t("home.hero.title")}
               </h1>
