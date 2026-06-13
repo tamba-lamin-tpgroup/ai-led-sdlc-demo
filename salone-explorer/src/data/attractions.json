@@ -18,9 +18,15 @@
     "rating": 4.7,
     "reviewCount": 312,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Tiwai_Island.jpg/1280px-Tiwai_Island.jpg"
+      "/images/attractions/tiwai-island.webp"
     ],
-    "tags": ["wildlife", "ecotourism", "island", "primates", "rainforest"],
+    "tags": [
+      "wildlife",
+      "ecotourism",
+      "island",
+      "primates",
+      "rainforest"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://tourismsierraleone.com/",
@@ -61,9 +67,15 @@
     "rating": 4.5,
     "reviewCount": 528,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/River_Number_2_Beach%2C_Sierra_Leone.jpg/1280px-River_Number_2_Beach%2C_Sierra_Leone.jpg"
+      "/images/attractions/river-no-2-beach.webp"
     ],
-    "tags": ["beach", "swimming", "family", "fishing", "lagoon"],
+    "tags": [
+      "beach",
+      "swimming",
+      "family",
+      "fishing",
+      "lagoon"
+    ],
     "sources": [
       "https://tourismsierraleone.com/",
       "https://www.visitsierraleone.org/"
@@ -99,9 +111,15 @@
     "rating": 4.6,
     "reviewCount": 184,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Bunce_Island_Fort.jpg/1280px-Bunce_Island_Fort.jpg"
+      "/images/attractions/bunce-island.webp"
     ],
-    "tags": ["history", "heritage", "slave-trade", "UNESCO", "diaspora"],
+    "tags": [
+      "history",
+      "heritage",
+      "slave-trade",
+      "UNESCO",
+      "diaspora"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://www.sierraleoneheritage.org/museum",
@@ -138,10 +156,16 @@
     "rating": 4.8,
     "reviewCount": 445,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Tacugama_Chimpanzee_Sanctuary.jpg/1280px-Tacugama_Chimpanzee_Sanctuary.jpg"
+      "/images/attractions/tacugama-chimpanzee-sanctuary.webp"
     ],
     "videoUrl": "https://www.youtube.com/watch?v=DummyTacugamaVideo",
-    "tags": ["wildlife", "conservation", "primates", "chimpanzees", "ecotourism"],
+    "tags": [
+      "wildlife",
+      "conservation",
+      "primates",
+      "chimpanzees",
+      "ecotourism"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://tourismsierraleone.com/",
@@ -178,9 +202,15 @@
     "rating": 4.3,
     "reviewCount": 267,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Sierra_Leone_National_Museum.jpg/1280px-Sierra_Leone_National_Museum.jpg"
+      "/images/attractions/sierra-leone-national-museum.webp"
     ],
-    "tags": ["history", "culture", "museum", "heritage", "Krio"],
+    "tags": [
+      "history",
+      "culture",
+      "museum",
+      "heritage",
+      "Krio"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://www.sierraleoneheritage.org/museum",
@@ -205,7 +235,7 @@
     "longDescription": "The Banana Islands — Dublin, Mes-Meheux, and Ricketts — lie a short boat ride off the southern tip of the Freetown Peninsula. The Portuguese established a trading post here in the 16th century, and the ruins of a small chapel and cemetery survive as reminders of that era. Today the islands are prized for their empty white-sand beaches, crystal-clear water, and healthy coral reefs that support vibrant snorkelling and diving. A small fishing community inhabits Mes-Meheux, welcoming visitors with fresh seafood and informal guesthouses. There are no cars on the islands; walking and canoe are the only modes of travel, lending the Banana Islands a rare atmosphere of unhurried peace. Dolphin sightings in the surrounding waters are common, particularly in the early morning.",
     "location": {
       "region": "Off the Freetown Peninsula, Western Area",
-      "latitude": 8.2500,
+      "latitude": 8.25,
       "longitude": -13.0333
     },
     "hours": {
@@ -217,9 +247,15 @@
     "rating": 4.6,
     "reviewCount": 198,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Banana_Islands_Sierra_Leone.jpg/1280px-Banana_Islands_Sierra_Leone.jpg"
+      "/images/attractions/banana-islands.webp"
     ],
-    "tags": ["island", "snorkelling", "history", "beach", "dolphins"],
+    "tags": [
+      "island",
+      "snorkelling",
+      "history",
+      "beach",
+      "dolphins"
+    ],
     "sources": [
       "https://tourismsierraleone.com/",
       "https://www.visitsierraleone.org/",
@@ -256,9 +292,15 @@
     "rating": 4.4,
     "reviewCount": 89,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Outamba-Kilimi_National_Park.jpg/1280px-Outamba-Kilimi_National_Park.jpg"
+      "/images/attractions/outamba-kilimi-national-park.webp"
     ],
-    "tags": ["safari", "hippos", "elephants", "national-park", "wildlife"],
+    "tags": [
+      "safari",
+      "hippos",
+      "elephants",
+      "national-park",
+      "wildlife"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://tourismsierraleone.com/",
@@ -295,9 +337,15 @@
     "rating": 4.8,
     "reviewCount": 74,
     "images": [
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Mount_Bintumani.jpg/1280px-Mount_Bintumani.jpg"
+      "/images/attractions/mount-bintumani.webp"
     ],
-    "tags": ["hiking", "mountain", "biodiversity", "forest-reserve", "highland"],
+    "tags": [
+      "hiking",
+      "mountain",
+      "biodiversity",
+      "forest-reserve",
+      "highland"
+    ],
     "sources": [
       "https://ntb.gov.sl/",
       "https://sierra-leone.org/",
